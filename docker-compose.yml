@@ -1,0 +1,103 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  postgres-service:
+    image: postgres:17
+    container_name: uni_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - unihostel
+    volumes:
+      - unihostel_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend - FastAPI
+  fastapi-service:
+    container_name: uni_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: fastapi
+    restart: unless-stopped
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres-service:5432/${DB_NAME}
+    networks:
+      - unihostel
+    volumes:
+      - ".:/usr/src/app"
+
+  # Frontend - Reflex
+  frontend-service:
+    container_name: uni_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - fastapi-service
+    ports:
+      - "3000:3000"
+    networks:
+      - unihostel
+
+  # Adminer (Database UI)
+  adminer-service:
+    image: adminer:latest
+    container_name: adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres-service
+    networks:
+      - unihostel
+    ports:
+      - "8080:8080"
+
+  # SMTP Service (Email Server)
+  smtp-service:
+    image: axllent/mailpit:v1.23
+    container_name: smtp
+    restart: unless-stopped
+    networks:
+      - unihostel
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  # MinIO (For Image Storage)
+  minio-service:
+    image: quay.io/minio/minio
+    container_name: minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    networks:
+      - unihostel
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+networks:
+  unihostel:
+    driver: bridge
+
+volumes:
+  unihostel_db:
+  minio_data:

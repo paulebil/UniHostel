@@ -1,0 +1,3 @@
+# Ignore environment variables and secrets
+backend/.env
+frontend/.env
