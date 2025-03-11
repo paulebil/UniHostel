@@ -34,7 +34,7 @@ services:
       postgres-service:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "8050:8050"
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres-service:5432/${DB_NAME}
     networks:
@@ -45,20 +45,27 @@ services:
     user: "1000:1000"
 
   # Frontend - Reflex
-  frontend-service:
-    container_name: uni_frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      - fastapi-service
-    ports:
-      - "3000:3000"
-    networks:
-      - unihostel
-    # Make sure the application has access to the files
-    user: "1000:1000"
+#  frontend-service:
+#    container_name: uni_frontend
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    depends_on:
+#      - fastapi-service
+#    ports:
+#      - "3000:3000"
+#    networks:
+#      - unihostel
+#    user: "1000:1000"  # Match the user ID and group ID of the host
+#    volumes:
+#      - web_cache:/app/.web  # Use a Docker volume for the .web directory
+#    environment:
+#      - REFLEX_DIR=/app/.local/share/reflex
+#      - LOGLEVEL=default
+#      - FRONTEND_PORT=3000
+#      - BACKEND_PORT=8000
+#      - FRONTEND_PACKAGE_MANAGER=npm  # Use npm instead of bun (optional)
 
   # Adminer (Database UI)
   adminer-service:
@@ -111,3 +118,5 @@ networks:
 volumes:
   unihostel_db:
   minio_data:
+#  web_cache:
+#    driver: local

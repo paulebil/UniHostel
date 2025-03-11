@@ -24,10 +24,10 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 COPY . /usr/src/app/
 
 # Set permissions to ensure non-root access
-RUN chown -R 1000:1000 /usr/src/app
+#RUN chown -R 1000:1000 /usr/src/app
 
 # Expose FastAPI port
-EXPOSE 8000
+EXPOSE 8050
 
 # Run FastAPI (remove --reload for production)
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8050"]
