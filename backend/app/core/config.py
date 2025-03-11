@@ -30,8 +30,8 @@ class Settings(BaseSettings):
 
     # MinIO
     MINIO_ENDPOINT: str = Field(..., env="MINIO_ENDPOINT")
-    MINIO_ACCESS_KEY: str = Field(..., env="MINIO_ACCESS_KEY")
-    MINIO_SECRET_KEY: str = Field(..., env="MINIO_SECRET_KEY")
+    MINIO_ROOT_USER: str = Field(..., env="MINIO_ROOT_USER")
+    MINIO_ROOT_PASSWORD: str = Field(..., env="MINIO_ROOT_PASSWORD")
     MINIO_BUCKET_NAME: str = Field(..., env="MINIO_BUCKET_NAME")
 
     # Security
