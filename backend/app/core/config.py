@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from pydantic import Field, model_validator
+from pydantic import Field, model_validator, EmailStr, SecretStr
 from pydantic_settings import BaseSettings
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
@@ -41,9 +41,14 @@ class Settings(BaseSettings):
     SMTP_HOST: str = Field(..., env="SMTP_HOST")
     SMTP_PORT: int = Field(..., env="SMTP_PORT")
     SMTP_USERNAME: str | None = Field(None, env="SMTP_USERNAME")
-    SMTP_PASSWORD: str | None = Field(None, env="SMTP_PASSWORD")
-    EMAIL_FROM: str = Field(..., env="EMAIL_FROM")
-    EMAIL_FROM_NAME: str = Field(..., env="EMAIL_FROM_NAME")
+    SMTP_PASSWORD: SecretStr | None = Field(None, env="SMTP_PASSWORD")
+    SMTP_FROM: EmailStr = Field(..., env="SMTP_FROM")
+    SMTP_FROM_NAME: str = Field(..., env="SMTP_FROM_NAME")
+    SMTP_SERVER: str = Field(...,env="SMTP_SERVER")
+    SMTP_STARTTLS: bool = Field(...,env="SMTP_STARTTLS")
+    SMTP_SSL_TLS: bool = Field(..., env="SMTP_SSL_TLS")
+    USE_CREDENTIALS: bool = Field(..., env="USE_CREDENTIALS")
+    SMTP_DEBUG: bool = Field(..., env="SMTP_DEBUG")
 
     # Database URI
     DATABASE_URI: str = ""
