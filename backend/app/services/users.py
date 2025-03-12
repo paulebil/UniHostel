@@ -7,6 +7,7 @@ from backend.app.core.security import Security
 from backend.app.models.users import User, UserToken
 from backend.app.core.config import get_settings
 from backend.app.repository.users import UserRepository
+from backend.app.responses.users import UserResponse
 
 settings = get_settings()
 security = Security()
@@ -29,7 +30,13 @@ class UserService:
             updated_at=datetime.now()
         )
         self.user_repository.create_user(user)
+        # Return a response model
+        user_response = UserResponse(
+            id=user.id,  # Assuming the ID is set after user creation
+            name=user.name,
+            email=user.email
+        )
 
         # TODO: Send email account verification email
 
-        return user
+        return user_response

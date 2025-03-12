@@ -6,6 +6,7 @@ from backend.app.schemas.users import UserCreateSchema
 from backend.app.services.users import UserService
 from backend.app.repository.users import UserRepository
 from backend.app.database.database import get_session
+from backend.app.responses.users import UserResponse
 
 user_router = APIRouter(
     prefix="/users",
@@ -17,7 +18,7 @@ def get_user_service(session: Session = Depends(get_session)) -> UserService:
     user_repository = UserRepository(session)
     return UserService(user_repository)
 
-@user_router.post("/create", response_model=UserCreateSchema)
+@user_router.post("/create", response_model=UserResponse)
 async def create_user(data: UserCreateSchema, background_task: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
     return await user_service.create_user_account(data, background_task)
 
