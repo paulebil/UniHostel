@@ -1,7 +1,7 @@
 # Ignore environment variables and secrets
 backend/.env
 frontend/.env
-
+.env
 # Ignore Python cache files
 __pycache__/
 *.pyc
