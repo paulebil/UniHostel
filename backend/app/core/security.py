@@ -82,10 +82,7 @@ class Security:
             )
 
     @staticmethod
-    async def get_token_user(
-            token: str,
-            session: Session
-    ) -> Optional[User]:
+    async def get_token_user(token: str,session: Session ) -> Optional[User]:
         payload = Security.get_token_payload(token)
 
         if not payload:
@@ -111,28 +108,20 @@ class Security:
             return None
 
     @staticmethod
-    async def load_user(
-            email: str,
-            session: Session
-    ) -> Optional[User]:
+    async def load_user(email: str,session: Session) -> Optional[User]:
         try:
             stmt = select(User).where(User.email == email)
-            return session.exec(stmt).one()
+            user = session.exec(stmt).one()
         except NoResultFound:
             logging.info(f"User not found: {email}")
-            return None
+            user = None
         except Exception as e:
             logging.error(f"Database error: {str(e)}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Database error"
-            )
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Database error")
+        return user
 
     @staticmethod
-    async def get_current_user(
-            token: str = Depends(oauth2_scheme),
-            session: Session = Depends(get_session)
-    ) -> User:
+    async def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session) ) -> User:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

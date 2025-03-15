@@ -2,11 +2,11 @@ from pydantic import BaseModel, EmailStr, constr
 
 class UserCreateSchema(BaseModel):
     name: str
-    email: EmailStr
-    password: constr(max_length=8)
+    email: str
+    password: constr(min_length=8)
 
-class UserActivateSchema(BaseModel):
-    email: EmailStr
+class ActivateUserSchema(BaseModel):
+    email: str
     token: str
 
 class UserLoginSchema(BaseModel):
@@ -14,9 +14,13 @@ class UserLoginSchema(BaseModel):
     password: str
 
 class UserForgotPasswordSchema(BaseModel):
-    email: EmailStr
+    email: str
 
 class UserRestPasswordSchema(BaseModel):
-    email: EmailStr
+    email: str
     token: str
     password: constr(min_length=8)
+
+class VerifyUserRequest(BaseModel):
+    token: str
+    email: EmailStr
