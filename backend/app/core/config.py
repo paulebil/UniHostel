@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(False, env="DEBUG")
     FRONTEND_HOST: str = Field(..., env="FRONTEND_HOST")
 
+    # JWT Secret key
+    JWT_SECRET: str = Field(..., env="JWT_SECRET")
+    JWT_ALGORITHM: str = Field(..., env="JWT_ALGORITHM")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(..., env="ACCESS_TOKEN_EXPIRE_MINUTES")
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = Field(..., env="REFRESH_TOKEN_EXPIRE_MINUTES")
+
     # PostgreSQL
     DB_USER: str = Field(..., env="DB_USER")
     DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
