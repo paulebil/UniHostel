@@ -15,6 +15,8 @@ from sqlmodel import Session, select
 from backend.app.database.database import get_session
 from backend.app.core.config import get_settings
 from backend.app.models.users import User, UserToken
+from backend.app.utils.string import unique_string
+
 
 settings = get_settings()
 
@@ -56,6 +58,44 @@ class Security:
             settings.JWT_SECRET,
             algorithm=settings.JWT_ALGORITHM
         )
+
+    def generate_token_pair(self, user: User, session: Session):
+        refresh_key = unique_string(100)
+        access_key = unique_string(50)
+        rt_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+
+        user_token = UserToken()
+        user_token.user_id = user.id
+        user_token.refresh_key = refresh_key
+        user_token.access_key = access_key
+        user_token.expires_at = datetime.now() + rt_expires
+        session.add(user_token)
+        session.commit()
+        session.refresh(user_token)
+
+        at_payload = {
+            "sub": self.str_encode(str(user.id)),
+            "a": access_key,
+            "r": self.str_encode(str(user_token.id)),
+            "n": self.str_encode(f"{user.name}")
+        }
+
+        at_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = self.generate_token(at_payload, at_expires)
+
+        rt_payload = {
+            "sub": self.str_encode(str(user.id)),
+            "t": refresh_key,
+            "a": access_key
+        }
+        refresh_token = self.generate_token(rt_payload, rt_expires)
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expires_in": at_expires.seconds
+        }
+
 
     @staticmethod
     def get_token_payload(token: str) -> Optional[dict]:

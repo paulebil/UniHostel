@@ -3,7 +3,7 @@ import logging
 
 from fastapi import HTTPException,BackgroundTasks
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from backend.app.core.security import Security
 from backend.app.models.users import User, UserToken
@@ -97,6 +97,31 @@ class UserService:
             raise HTTPException(status_code=400, detail="Your account has been deactivated. Please contact support.")
 
         # TODO: Generate the jwt token and return it
+        return Security.generate_token_pair(user, session=session)
+
+    @staticmethod
+    async def get_refresh_token(self, refresh_token, session: Session):
+        token_payload = Security.get_token_payload(refresh_token)
+        if not token_payload:
+            raise HTTPException(status_code=400, detail="Invalid Request.")
+        refresh_key = token_payload.get('t')
+        access_key = token_payload.get('a')
+
+        user_id = Security.str_decode(token_payload.get('sub'))
+        user_token = session.query(UserToken).options(joinedload(UserToken.user)).filter(UserToken.refresh_key == refresh_key,
+                                                                                         UserToken.access_key == access_key,
+                                                                                         UserToken.user_id == user_id,
+                                                                                         UserToken.expires_at > datetime.now()
+                                                                                         ).first()
+
+        if not user_token:
+            raise HTTPException(status_code=400, detail="Invalid Request.")
+
+        user_token.expires_at = datetime.now()
+        session.add(user_token)
+        session.commit()
+
+        return Security.generate_token_pair(UserToken.user, session=session)
 
     @staticmethod
     async def email_forgot_password_link(self, data: UserForgotPasswordSchema, background_tasks: BackgroundTasks, session: Session):
