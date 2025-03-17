@@ -119,7 +119,6 @@ class Security:
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-    #@staticmethod
     async def get_token_user(self, token: str, session: Session) -> Optional[User]:
         payload = self.get_token_payload(token)
 
@@ -160,7 +159,6 @@ class Security:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
         return user
 
-   # @staticmethod
     async def get_current_user(self, token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)) -> User:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

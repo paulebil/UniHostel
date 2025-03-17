@@ -35,11 +35,11 @@ def get_user_service(session: Session = Depends(get_session)) -> UserService:
     return UserService(user_repository)
 
 @user_router.post("/create", status_code=status.HTTP_201_CREATED,response_model=UserResponse)
-async def create_user(data: CreateUser, background_task: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
+async def create_user(data: UserCreateSchema, background_task: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
     return await user_service.create_user_account(data, background_task)
 
 @user_router.post("/verify", status_code=status.HTTP_200_OK)
-async def verify_user(data: ActivateUser, background_tasks: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
+async def verify_user(data: ActivateUserSchema, background_tasks: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
     await  user_service.activate_user_account(data, background_tasks)
     return JSONResponse({"message": "Account is activated successfully."})
 
@@ -53,12 +53,12 @@ async def refresh_token(refresh_token = Header(), user_service: UserService = De
     return await user_service.get_refresh_token(refresh_token, session)
 
 @guest_router.post("/forgot-password", status_code=status.HTTP_200_OK)
-async def forgot_password(data: ForgotPassword, background_tasks: BackgroundTasks, session: Session = Depends(get_session), user_service: UserService = Depends(get_user_service)):
+async def forgot_password(data: UserForgotPasswordSchema, background_tasks: BackgroundTasks, session: Session = Depends(get_session), user_service: UserService = Depends(get_user_service)):
     await user_service.email_forgot_password_link(data, background_tasks, session)
     return JSONResponse({"message": "A email with password reset link has been sent to you."})
 
 @guest_router.put("/reset-password", status_code=status.HTTP_200_OK)
-async def reset_password(data: RestPassword, session: Session = Depends(get_session), user_service: UserService = Depends(get_user_service)):
+async def reset_password(data: UserRestPasswordSchema, session: Session = Depends(get_session), user_service: UserService = Depends(get_user_service)):
     await user_service.reset_password(data, session)
     return JSONResponse({"message": "Your password has been updated."})
 
