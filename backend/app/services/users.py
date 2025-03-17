@@ -84,8 +84,8 @@ class UserService:
         await UserAuthEmailService.send_account_activation_confirmation_email(user, background_task=background_tasks)
 
     @staticmethod
-    async def get_login_token(self, data: UserLoginSchema, session: Session):
-        user = await Security.load_user(data.username, session=session)
+    async def get_login_token(data: UserLoginSchema, session: Session):
+        user = await security.load_user(data.username, session=session)
 
         if not user:
             raise HTTPException(status_code=400, detail="Email not registered with us.")
@@ -97,17 +97,18 @@ class UserService:
             raise HTTPException(status_code=400, detail="Your account has been deactivated. Please contact support.")
 
         # TODO: Generate the jwt token and return it
-        return Security.generate_token_pair(user, session=session)
+
+        return security.generate_token_pair(user, session)
 
     @staticmethod
     async def get_refresh_token(self, refresh_token, session: Session):
-        token_payload = Security.get_token_payload(refresh_token)
+        token_payload = security.get_token_payload(refresh_token)
         if not token_payload:
             raise HTTPException(status_code=400, detail="Invalid Request.")
         refresh_key = token_payload.get('t')
         access_key = token_payload.get('a')
 
-        user_id = Security.str_decode(token_payload.get('sub'))
+        user_id = security.str_decode(token_payload.get('sub'))
         user_token = session.query(UserToken).options(joinedload(UserToken.user)).filter(UserToken.refresh_key == refresh_key,
                                                                                          UserToken.access_key == access_key,
                                                                                          UserToken.user_id == user_id,
@@ -121,11 +122,11 @@ class UserService:
         session.add(user_token)
         session.commit()
 
-        return Security.generate_token_pair(UserToken.user, session=session)
+        return security.generate_token_pair(UserToken.user, session=session)
 
     @staticmethod
     async def email_forgot_password_link(self, data: UserForgotPasswordSchema, background_tasks: BackgroundTasks, session: Session):
-        user = await Security.load_user(data.email, session)
+        user = await security.load_user(data.email, session)
         if not user.verified_at:
             raise HTTPException(status_code=400, detail="Your account is not verified. Please check your email inbox to verify your account.")
         if not user.is_active:
@@ -135,7 +136,7 @@ class UserService:
 
 
     async def reset_password(self, data: UserRestPasswordSchema, session: Session):
-        user = await Security.load_user(data.email, session)
+        user = await security.load_user(data.email, session)
 
         if not user:
             raise HTTPException(status_code=400, detail="Invalid request")
@@ -147,14 +148,14 @@ class UserService:
         user_token = user.get_context_string(context=FORGOT_PASSWORD)
 
         try:
-            token_valid = Security.verify_password(user_token, data.token)
+            token_valid = security.verify_password(user_token, data.token)
         except Exception as verify_exec:
             logging.exception(verify_exec)
             token_valid = False
         if not token_valid:
             raise HTTPException(status_code=400, detail="Invalid request window.")
 
-        user.password = Security.hash_password(data.password)
+        user.password = security.hash_password(data.password)
         user.updated_at = datetime.now()
 
         self.user_repository.update_user(user)

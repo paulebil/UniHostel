@@ -10,16 +10,15 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import joinedload
-from sqlmodel import Session, select
+from sqlalchemy.future import select
+from sqlmodel import Session
 
 from backend.app.database.database import get_session
 from backend.app.core.config import get_settings
 from backend.app.models.users import User, UserToken
 from backend.app.utils.string import unique_string
 
-
 settings = get_settings()
-
 
 class Security:
     PASSWORD_REGEX = re.compile(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$')
@@ -96,7 +95,6 @@ class Security:
             "expires_in": at_expires.seconds
         }
 
-
     @staticmethod
     def get_token_payload(token: str) -> Optional[dict]:
         try:
@@ -121,16 +119,16 @@ class Security:
                 headers={"WWW-Authenticate": "Bearer"}
             )
 
-    @staticmethod
-    async def get_token_user(token: str,session: Session ) -> Optional[User]:
-        payload = Security.get_token_payload(token)
+    #@staticmethod
+    async def get_token_user(self, token: str, session: Session) -> Optional[User]:
+        payload = self.get_token_payload(token)
 
         if not payload:
             return None
 
         try:
-            user_token_id = Security.str_decode(payload.get('r'))
-            user_id = Security.str_decode(payload.get('sub'))
+            user_token_id = self.str_decode(payload.get('r'))
+            user_id = self.str_decode(payload.get('sub'))
             access_key = payload.get('a')
 
             stmt = select(UserToken).where(
@@ -140,7 +138,8 @@ class Security:
                 UserToken.expires_at > datetime.now(timezone.utc)
             ).options(joinedload(UserToken.user))
 
-            user_token = session.exec(stmt).first()
+            # Use session.execute() with .scalars().first() to fetch a single result
+            user_token = session.execute(stmt).scalars().first()
             return user_token.user if user_token else None
 
         except Exception as e:
@@ -148,27 +147,28 @@ class Security:
             return None
 
     @staticmethod
-    async def load_user(email: str,session: Session) -> Optional[User]:
+    async def load_user(email: str, session: Session) -> Optional[User]:
         try:
             stmt = select(User).where(User.email == email)
-            user = session.exec(stmt).one()
+            # Use session.execute() with .scalars().first() to fetch a single result
+            user = session.execute(stmt).scalars().first()
         except NoResultFound:
             logging.info(f"User not found: {email}")
             user = None
         except Exception as e:
             logging.error(f"Database error: {str(e)}")
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Database error")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
         return user
 
-    @staticmethod
-    async def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session) ) -> User:
+   # @staticmethod
+    async def get_current_user(self, token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)) -> User:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-        user = await Security.get_token_user(token=token, session=session)
+        user = await self.get_token_user(token=token, session=session)
         if user is None:
             raise credentials_exception
         return user

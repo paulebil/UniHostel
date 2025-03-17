@@ -6,8 +6,8 @@ from backend.app.core.config import get_settings
 settings = get_settings()
 
 conf = ConnectionConfig(
-    MAIL_USERNAME=settings.SMTP_USERNAME,
-    MAIL_PASSWORD=settings.SMTP_PASSWORD,
+    MAIL_USERNAME=settings.SMTP_USERNAME or "",
+    MAIL_PASSWORD=settings.SMTP_PASSWORD or "",
     MAIL_PORT=settings.SMTP_PORT,
     MAIL_SERVER=settings.SMTP_SERVER,
     MAIL_STARTTLS=settings.SMTP_STARTTLS,

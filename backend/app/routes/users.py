@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from backend.app.schemas.users import *
-from backend.app.services.users import UserService
+from backend.app.services.users import UserService, security
 from backend.app.repository.users import UserRepository
 from backend.app.database.database import get_session
 from backend.app.responses.users import *
@@ -44,8 +44,9 @@ async def verify_user(data: ActivateUser, background_tasks: BackgroundTasks, use
     return JSONResponse({"message": "Account is activated successfully."})
 
 @guest_router.post("/login", status_code=status.HTTP_200_OK, response_model=UserLoginResponse)
-async def user_login(data: OAuth2PasswordRequestForm = Depends(), user_service: UserService = Depends(get_user_service), session: Session = Depends(get_session)):
-    return await user_service.get_login_token(data, session=session)
+async def user_login(data: UserLoginSchema, user_service: UserService = Depends(get_user_service), session: Session = Depends(get_session)):
+    user = await user_service.get_login_token(data, session)
+    return user
 
 @guest_router.post("/refresh", status_code=status.HTTP_200_OK, response_model=UserLoginResponse)
 async def refresh_token(refresh_token = Header(), user_service: UserService = Depends(get_user_service), session: Session = Depends(get_session)):
@@ -62,5 +63,5 @@ async def reset_password(data: RestPassword, session: Session = Depends(get_sess
     return JSONResponse({"message": "Your password has been updated."})
 
 @auth_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
-async def fetch_user(user = Depends(Security.get_current_user)):
+async def fetch_user(user = Depends(security.get_current_user)):
     return user
