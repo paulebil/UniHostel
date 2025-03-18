@@ -13,6 +13,7 @@ class User(Base):
     verified_at = Column(DateTime, nullable=True, default=None, onupdate=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now())
     tokens = relationship("UserToken", back_populates="user", cascade="all, delete")
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete")
 
     def get_context_string(self, context: str):
         return f"{context}{self.password[-6:]}{self.updated_at.strftime('%m%d%Y%H%M%S')}".strip()
@@ -27,3 +28,18 @@ class UserToken(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     expires_at = Column(DateTime, nullable=False)
     user = relationship("User", back_populates="tokens")
+
+
+class PasswordResetToken(Base):
+    __tablename__ = 'password_reset_tokens'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    token_hash = Column(String(255), nullable=False)  # Store the hashed token
+    created_at = Column(DateTime, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)  # Set expiration for token
+
+    user = relationship("User", back_populates="password_reset_tokens")
+
+    def __repr__(self):
+        return f"<PasswordResetToken(user_id={self.user_id}, token_hash={self.token_hash})>"
