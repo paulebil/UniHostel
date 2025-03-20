@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from backend.app.schemas.users import *
 from backend.app.services.users import UserService, security
 from backend.app.repository.users import UserRepository
+from backend.app.repository.password_reset import PasswordResetRepository
 from backend.app.database.database import get_session
 from backend.app.responses.users import *
 from backend.app.core.security import Security
@@ -32,7 +33,8 @@ auth_router = APIRouter(
 
 def get_user_service(session: Session = Depends(get_session)) -> UserService:
     user_repository = UserRepository(session)
-    return UserService(user_repository)
+    password_reset_repository = PasswordResetRepository(session)
+    return UserService(user_repository, password_reset_repository)
 
 @user_router.post("/create", status_code=status.HTTP_201_CREATED,response_model=UserResponse)
 async def create_user(data: UserCreateSchema, background_task: BackgroundTasks, user_service: UserService = Depends(get_user_service)):
