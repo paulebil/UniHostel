@@ -13,6 +13,10 @@ class UserRepository:
         stmt = select(User).where(User.email == email)
         return self.session.execute(stmt).scalars().first()
 
+    def get_user_by_mobile(self, mobile: int) -> User:
+        user = self.session.query(User).where(User.mobile == mobile).first()
+        return user
+
     def create_user(self, user: User) -> None:
         try:
             self.session.add(user)

@@ -29,11 +29,17 @@ class UserService:
         user_exist = self.user_repository.get_user_by_email(data.email)
         if user_exist:
             raise HTTPException(status_code=400, detail="Email already exists.")
+        user_number_exists = self.user_repository.get_user_by_mobile(data.mobile)
+        if user_number_exists:
+            raise HTTPException(status_code=400, detail="Mobile number already exists.")
         if not security.is_password_strong_enough(data.password):
             raise HTTPException(status_code=400, detail="Please provide a strong password.")
+
         user = User(
             name=data.name,
             email=data.email,
+            role=data.role,
+            mobile=data.mobile,
             password=security.hash_password(data.password),
             is_active=False,
             updated_at=datetime.now()
