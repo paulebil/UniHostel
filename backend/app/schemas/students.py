@@ -9,17 +9,17 @@ class StudentBase(BaseModel):
 
 # Create schema for creating a new student
 class StudentCreate(StudentBase):
-    email: EmailStr
+    email: str
     mobile: int
-    name: str
-    password: str
 
 # Update schema for updating an existing student
 class StudentUpdate(StudentBase):
-    email: Optional[EmailStr]
+    email: Optional[str]
     mobile: Optional[int]
     name: Optional[str]
-    password: Optional[str]
+
+
+
 
 
 
