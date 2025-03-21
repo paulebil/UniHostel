@@ -8,15 +8,12 @@ class HostelOwnerBase(BaseModel):
 
 # Create schema for creating a new hostel owner
 class HostelOwnerCreate(HostelOwnerBase):
-    email: EmailStr
+    email: str
     mobile: int
-    name: str
-    password: str
 
 # Update schema for updating an existing hostel owner
 class HostelOwnerUpdate(HostelOwnerBase):
-    email: Optional[EmailStr]
+    email: Optional[str]
     mobile: Optional[int]
-    name: Optional[str]
-    password: Optional[str]
+
 
