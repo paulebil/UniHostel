@@ -18,6 +18,7 @@ class StudentRepository:
 
     def update_student(self, student: Student) -> None:
         try:
+            self.session.merge(student)
             self.session.commit()
             self.session.refresh(student)
         except IntegrityError:

@@ -59,7 +59,8 @@ class PasswordResetToken(Base):
 class Student(Base):
     __tablename__ = "students"
 
-    id = Column(Integer, ForeignKey("users.id"),primary_key=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     university_name = Column(String(150), nullable=False)
     student_number = Column(String(100), unique=True, nullable=False)
 
@@ -68,8 +69,8 @@ class Student(Base):
 
 class HostelOwner(Base):
     __tablename__ = "hostel_owners"
-
-    id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     business_name = Column(String(150), nullable=False)
 
     user = relationship("User", back_populates="hostel_owner")
