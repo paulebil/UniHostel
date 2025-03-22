@@ -39,3 +39,5 @@ class StudentRepository:
     def get_student_by_user_mobile(self, mobile: int) -> Student:
         return self.session.query(Student).join(User).filter(User.mobile == mobile).first()
 
+    def get_all_students(self):
+        return self.session.query(Student).all()

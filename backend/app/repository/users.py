@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
-from backend.app.models.users import User, UserToken
+from backend.app.models.users import User, UserToken, Student, HostelOwner
 from sqlalchemy.exc import IntegrityError
 
 
@@ -16,6 +16,9 @@ class UserRepository:
     def get_user_by_mobile(self, mobile: int) -> User:
         user = self.session.query(User).where(User.mobile == mobile).first()
         return user
+
+    def get_all_users(self):
+        return self.session.query(User).options(joinedload(User.student), joinedload(User.hostel_owner)).all()
 
     def create_user(self, user: User) -> None:
         try:

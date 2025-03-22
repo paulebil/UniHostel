@@ -39,3 +39,6 @@ class HostelOwnerRepository:
     def get_hostel_owner_by_mobile(self, mobile: int) -> HostelOwner:
         return self.session.query(HostelOwner).join(User).filter(User.mobile == mobile).first()
 
+    def get_all_hostel_owners(self):
+        return self.session.query(HostelOwner).all()
+
