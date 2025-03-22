@@ -8,7 +8,9 @@ from backend.app.core.security import Security
 from backend.app.models.users import User, UserToken
 from backend.app.core.config import get_settings
 from backend.app.repository.users import UserRepository
-from backend.app.responses.users import UserResponse
+from backend.app.responses.users import UserResponse, AllUserResponse
+from backend.app.responses.students import StudentBase
+from backend.app.responses.custodian import HostelOwnerBase
 from backend.app.schemas.users import *
 from backend.app.services.email_service import UserAuthEmailService
 from backend.app.services.password_reset import PasswordResetService
@@ -133,6 +135,28 @@ class UserService:
         if user:
             return user
         raise HTTPException(status_code=400, detail="User does not exist.")
+
+    async def fetch_all_users(self):
+        users = self.user_repository.get_all_users()
+        return [
+            AllUserResponse(
+                id=user.id,
+                name=user.name,
+                email=user.email,
+                mobile=user.mobile,
+                role=user.role.value,
+                is_active=user.is_active,
+                verified_at=user.verified_at,
+                updated_at=user.updated_at,
+                student=StudentBase(
+                    student_number=user.student.student_number,
+                    university_name=user.student.university_name
+                )if user.student else None,
+                hostel_owner=HostelOwnerBase(
+                    business_name=user.hostel_owner.business_name,
+                )if user.hostel_owner else None,
+            ) for user in users
+        ]
 
 def get_user_service(session: Session = Depends(get_session)) -> UserService:
     user_repository = UserRepository(session)

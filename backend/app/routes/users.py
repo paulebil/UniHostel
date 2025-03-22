@@ -33,6 +33,13 @@ auth_router = APIRouter(
     dependencies=[Depends(security.oauth2_scheme), Depends(security.get_current_user)]
 )
 
+admin_router = APIRouter(
+    prefix="/admin",
+    tags=["Admin"],
+    responses={404: {"description": "Not found"}},
+    dependencies=[Depends(security.oauth2_scheme), Depends(security.get_current_user)]
+)
+
 def get_user_service(session: Session = Depends(get_session)) -> UserService:
     user_repository = UserRepository(session)
     password_reset_repository = PasswordResetRepository(session)
@@ -70,3 +77,6 @@ async def reset_password(data: UserRestPasswordSchema, session: Session = Depend
 async def fetch_user(user=Depends(security.get_current_user), token: str = Header(None)):  # Use Header instead
     return user
 
+@admin_router.get("/users", response_model=list[AllUserResponse])
+async def get_all_users(user_service: UserService = Depends(get_user_service)):
+    return await user_service.fetch_all_users()
