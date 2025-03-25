@@ -36,3 +36,5 @@ class HostelRepository:
     def get_all_hostels(self):
         return self.session.query(Hostel).all()
 
+    def get_hostel_by_name(self, name: str) -> Hostel:
+        return self.session.query(Hostel).filter(Hostel.name == name).first()

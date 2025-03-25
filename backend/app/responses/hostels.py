@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 
 
-class HostelResponseSchema(BaseModel):
+class HostelResponse(BaseModel):
     """
     Pydantic model for serializing hostel data in API responses.
     """
@@ -19,8 +19,8 @@ class HostelResponseSchema(BaseModel):
     created_at: datetime  # Use datetime for proper date handling
     updated_at: Optional[datetime] = None  # Use datetime for proper date handling
 
-class HostelListResponseSchema(BaseModel):
+class HostelListResponse(BaseModel):
     """
     Pydantic model for returning a list of hostels in API responses.
     """
-    hostels: List[HostelResponseSchema]
+    hostels: List[HostelResponse]

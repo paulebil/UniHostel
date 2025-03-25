@@ -21,7 +21,7 @@ class Hostel(Base):
     average_price = Column(Integer, nullable=False)
     available_rooms = Column(Integer, nullable=False, default=0)
     amenities = Column(Text, nullable=True)
-    is_available = Column(Boolean, default=True)
+    #is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 
