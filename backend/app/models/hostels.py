@@ -11,10 +11,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.schema import DDL
-
-from backend.app.database.database import Base  # Import your Base class
-
+from sqlalchemy import event
+from backend.app.database.database import Base
 
 class Hostel(Base):
     """
@@ -40,16 +38,16 @@ class Hostel(Base):
     # Relationships
     owner = relationship("User", back_populates="hostels")  # Links to User.hostels
 
+    # Create GIN index for the search_vector column
     __table_args__ = (
-        # Create GIN index for the search_vector column
         Index("fts_idx", "search_vector", postgresql_using="gin"),
-
-        # Add a trigger that updates the search_vector column on insert/update
-        DDL(
-            """
-            CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
-            ON hostels FOR EACH ROW EXECUTE FUNCTION
-            tsvector_update_trigger(search_vector, 'pg_catalog.english', name, location, description, amenities);
-            """
-        ),
     )
+
+# Register the DDL trigger via event listener
+@event.listens_for(Hostel.__table__, 'after_create')
+def create_trigger(target, connection, **kwargs):
+    connection.execute("""
+        CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
+        ON hostels FOR EACH ROW EXECUTE FUNCTION
+        tsvector_update_trigger(search_vector, 'pg_catalog.english', name, location, description, amenities);
+    """)
