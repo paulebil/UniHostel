@@ -1,16 +1,4 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Text,
-    Boolean,
-    ForeignKey,
-    DateTime,
-    func,
-    Index,
-    Float,
-    Enum,
-)
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime, func, Index, Float, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy import event
