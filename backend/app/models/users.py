@@ -25,6 +25,7 @@ class User(Base):
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete")
     student = relationship("Student", back_populates="user", cascade="all, delete", uselist=False)
     hostel_owner = relationship("HostelOwner", back_populates="user", cascade="all, delete")
+    hostels = relationship("Hostel", back_populates="owner", cascade="all, delete")
 
     def get_context_string(self, context: str):
         return f"{context}{self.password[-6:]}{self.updated_at.strftime('%m%d%Y%H%M%S')}".strip()
