@@ -30,7 +30,7 @@ class Hostel(Base):
 
     # Relationships
     owner = relationship("User", back_populates="hostels")  # Links to User.hostels
-    rooms = relationship("Room", back_populates="hostel", cascade="all, delete-orphan")
+    rooms = relationship("Rooms", back_populates="hostel", cascade="all, delete-orphan")
 
     # Create GIN index for the search_vector column
     __table_args__ = (
