@@ -23,7 +23,7 @@ security = Security()
 logger = logging.getLogger(__name__)
 
 class UserService:
-    def __init__(self, user_repository: UserRepository, password_reset_repository: PasswordResetRepository):
+    def __init__(self, user_repository: UserRepository,password_reset_repository: PasswordResetRepository):
         self.user_repository = user_repository
         self.password_reset_service = PasswordResetService(password_reset_repository, user_repository)
 
@@ -47,7 +47,7 @@ class UserService:
             updated_at=datetime.now()
         )
         self.user_repository.create_user(user)
-        user_response = UserResponse(id=user.id, name=user.name, email=user.email)
+        user_response = UserResponse(id=user.id, name=user.name, email=user.email, mobile=user.mobile)
         await UserAuthEmailService.send_account_verification_email(user, background_task=background_tasks)
         return user_response
 
@@ -132,6 +132,23 @@ class UserService:
 
     async def fetch_user_detail(self, user_id):
         user = self.user_repository.get_user_by_id(user_id)
+        user =  AllUserResponse(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            mobile=user.mobile,
+            role=user.role.value,
+            is_active=user.is_active,
+            verified_at=user.verified_at,
+            updated_at=user.updated_at,
+            student=StudentBase(
+                student_number=user.student.student_number,
+                university_name=user.student.university_name
+            ) if user.student else None,
+            hostel_owner=HostelOwnerBase(
+                business_name=user.hostel_owner.business_name,
+            ) if user.hostel_owner else None,
+        )
         if user:
             return user
         raise HTTPException(status_code=400, detail="User does not exist.")
@@ -157,8 +174,3 @@ class UserService:
                 )if user.hostel_owner else None,
             ) for user in users
         ]
-
-def get_user_service(session: Session = Depends(get_session)) -> UserService:
-    user_repository = UserRepository(session)
-    password_reset_repository = PasswordResetRepository(session)
-    return UserService(user_repository, password_reset_repository)

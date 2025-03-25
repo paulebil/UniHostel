@@ -23,7 +23,7 @@ class User(Base):
 
     tokens = relationship("UserToken", back_populates="user", cascade="all, delete")
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete")
-    student = relationship("Student", back_populates="user", cascade="all, delete")
+    student = relationship("Student", back_populates="user", cascade="all, delete", uselist=False)
     hostel_owner = relationship("HostelOwner", back_populates="user", cascade="all, delete")
 
     def get_context_string(self, context: str):
@@ -59,7 +59,7 @@ class PasswordResetToken(Base):
 class Student(Base):
     __tablename__ = "students"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     university_name = Column(String(150), nullable=False)
     student_number = Column(String(100), unique=True, nullable=False)
@@ -69,7 +69,7 @@ class Student(Base):
 
 class HostelOwner(Base):
     __tablename__ = "hostel_owners"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     business_name = Column(String(150), nullable=False)
 

@@ -13,6 +13,7 @@ class StudentService:
         self.user_repository = user_repository
 
     async def create_student(self, data: StudentCreate) -> StudentResponse:
+        # Check if a student with this email or mobile already exists
         student_exists = self.student_repository.get_student_by_user_email(data.email)
         if student_exists:
             raise HTTPException(status_code=400, detail="Email already exists.")
@@ -20,15 +21,21 @@ class StudentService:
         if student_mobile:
             raise HTTPException(status_code=400, detail="Mobile number already exists.")
 
+        # Retrieve corresponding user
+        corresponding_user = self.user_repository.get_user_by_email(data.email)
+        if not corresponding_user:
+            raise HTTPException(status_code=404, detail="User not found.")
+
+        # Create Student with user_id
         student = Student(
+            user_id=corresponding_user.id,  # ✅ Assign user_id here
             university_name=data.university_name,
             student_number=data.student_number
         )
 
         self.student_repository.create_student(student)
 
-        corresponding_user = self.user_repository.get_user_by_email(data.email)
-
+        # Return student response
         student_response = StudentResponse(
             id=corresponding_user.id,
             email=corresponding_user.email,
@@ -40,6 +47,8 @@ class StudentService:
             verified_at=corresponding_user.verified_at,
             updated_at=corresponding_user.updated_at
         )
+
+        return student_response
 
         return student_response
 

@@ -1,8 +1,8 @@
-"""create users tables
+"""create user tables
 
-Revision ID: ef0eff74c135
+Revision ID: 9a2c68c0f317
 Revises: 
-Create Date: 2025-03-21 09:50:27.555919
+Create Date: 2025-03-24 13:14:12.554463
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ef0eff74c135'
+revision: str = '9a2c68c0f317'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,9 +36,10 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_table('hostel_owners',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('business_name', sa.String(length=150), nullable=False),
-    sa.ForeignKeyConstraint(['id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('password_reset_tokens',
@@ -51,10 +52,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('students',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('university_name', sa.String(length=150), nullable=False),
     sa.Column('student_number', sa.String(length=100), nullable=False),
-    sa.ForeignKeyConstraint(['id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('student_number')
     )

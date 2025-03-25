@@ -4,10 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
 from backend.app.database.database import Base
-from backend.app.models.users import *
 from backend.app.core.config import get_settings
+from backend.app.models.users import *
 
 settings = get_settings()
 

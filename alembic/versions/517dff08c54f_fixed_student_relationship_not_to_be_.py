@@ -1,8 +1,8 @@
-"""removed enum from the model
+"""fixed student relationship not to be treated as list
 
-Revision ID: 6cb7f7a4506d
-Revises: 6f653d25e920
-Create Date: 2025-03-21 10:25:22.134422
+Revision ID: 517dff08c54f
+Revises: 9a2c68c0f317
+Create Date: 2025-03-24 13:39:38.471742
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6cb7f7a4506d'
-down_revision: Union[str, None] = '6f653d25e920'
+revision: str = '517dff08c54f'
+down_revision: Union[str, None] = '9a2c68c0f317'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
