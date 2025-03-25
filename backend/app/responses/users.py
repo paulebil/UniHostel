@@ -22,4 +22,4 @@ class AllUserResponse(UserResponse):
     verified_at: Optional[datetime]
     updated_at: datetime
     student: Optional[StudentBase]
-    hostel_owner: Optional[HostelOwnerBase]
+    hostel_owner: list[Optional[HostelOwnerBase]]

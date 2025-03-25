@@ -168,9 +168,10 @@ class UserService:
                 student=StudentBase(
                     student_number=user.student.student_number,
                     university_name=user.student.university_name
-                )if user.student else None,
-                hostel_owner=HostelOwnerBase(
-                    business_name=user.hostel_owner.business_name,
-                )if user.hostel_owner else None,
+                ) if user.student else None,
+                hostel_owner=[
+                    HostelOwnerBase(business_name=owner.business_name)
+                    for owner in user.hostel_owner
+                ] if user.hostel_owner else []
             ) for user in users
         ]

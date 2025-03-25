@@ -20,13 +20,16 @@ class HostelOwnerService:
         if owner_mobile:
             raise HTTPException(status_code=400, detail="Mobile number already exists")
 
+        corresponding_user = self.user_repository.get_user_by_email(data.email)
+
         owner = HostelOwner(
+            user_id=corresponding_user.id,
             business_name=data.business_name
         )
 
         self.hostel_owner_repository.create_hostel_owner(owner)
 
-        corresponding_user = self.user_repository.get_user_by_email(data.email)
+
 
         hostel_owner_response = HostelOwnerResponse(
             id=corresponding_user.id,
