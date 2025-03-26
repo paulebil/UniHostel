@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from backend.app.routes.users import user_router, auth_router, guest_router, admin_router
-from backend.app.routes.hostels import hostel_router
+from backend.app.routes.hostels import hostel_router, hostel_user_router
 
 
 def create_application():
@@ -11,6 +11,8 @@ def create_application():
     application.include_router(admin_router)
 
     application.include_router(hostel_router)
+    application.include_router(hostel_user_router)
+
     return application
 
 app = create_application()

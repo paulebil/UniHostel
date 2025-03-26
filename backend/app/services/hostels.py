@@ -25,7 +25,7 @@ class HostelService:
             image_url=data.image_url,
             description=data.description,
             location=data.location,
-            owner_id=data.owner_id,
+            owner_id=current_user.id,
             average_price=data.average_price,
             available_rooms=data.available_rooms,
             amenities=data.amenities,
@@ -49,3 +49,26 @@ class HostelService:
             updated_at=hostel.updated_at
         )
         return hostel_response
+
+    async def get_all_hostels(self) -> HostelListResponse:
+        hostels =  self.hostel_repository.get_all_hostels()
+        # Convert each hostel (SQLAlchemy object) into HostelResponse
+        hostel_responses = [
+            HostelResponse(
+                id=hostel.id,
+                name=hostel.name,
+                image_url=hostel.image_url,
+                description=hostel.description,
+                location=hostel.location,
+                owner_id=hostel.owner_id,
+                average_price=hostel.average_price,
+                available_rooms=hostel.available_rooms,
+                amenities=hostel.amenities,
+                created_at=hostel.created_at,
+                updated_at=hostel.updated_at,
+            )
+            for hostel in hostels
+        ]
+
+        # Return a single HostelListResponse with the list of HostelResponse
+        return HostelListResponse(hostels=hostel_responses)
