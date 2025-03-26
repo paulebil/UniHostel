@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from starlette.responses import JSONResponse
 
 from backend.app.models.hostels import Hostel
 from backend.app.models.users import User
@@ -100,6 +101,30 @@ class HostelService:
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
+
+    async def delete_hostel(self, hostel_id: int, current_user: User):
+        # check if user is a hostel owner
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User is not authorized to delete a hostel.")
+        # Retrieve the owner using user id
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel owner not found.")
+
+        # get the hostels by owner id
+        hostel = self.hostel_repository.get_hostel_by_owner_id(owner.id)
+        if not hostel:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
+
+        hostel_to_delete = self.hostel_repository.get_hostel_by_id(hostel_id)
+        if not hostel_to_delete:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Hostel does not exists")
+
+        self.hostel_repository.delete_hostel(hostel_to_delete)
+
+        return JSONResponse("Hostel deleted successfully.")
+
 
 
     async def get_all_hostels(self) -> HostelListResponse:
