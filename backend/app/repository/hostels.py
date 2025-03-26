@@ -38,3 +38,6 @@ class HostelRepository:
 
     def get_hostel_by_name(self, name: str) -> Hostel:
         return self.session.query(Hostel).filter(Hostel.name == name).first()
+
+    def get_hostel_by_owner_id(self, id: int) -> Hostel:
+        return self.session.query(Hostel).filter(Hostel.owner_id == id).first()
