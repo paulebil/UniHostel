@@ -47,6 +47,11 @@ async def delete_hostel(hostel_id: int, hostel_service: HostelService = Depends(
                         current_user = Depends(security.get_current_user)):
     return await hostel_service.delete_hostel(hostel_id, current_user)
 
+@hostel_router.get("/my-hostels", status_code=status.HTTP_200_OK, response_model=HostelListResponse)
+async def get_all_my_hostels(hostel_service: HostelService = Depends(get_hostel_service),
+                             current_user = Depends(security.get_current_user)):
+    return await hostel_service.get_all_my_hostels(current_user)
+
 @hostel_user_router.get("/all-hostels", status_code=status.HTTP_200_OK, response_model=HostelListResponse)
 async def get_all_hostels(hostel_service: HostelService = Depends(get_hostel_service)):
     return await hostel_service.get_all_hostels()

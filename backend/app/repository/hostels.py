@@ -1,4 +1,3 @@
-from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -39,8 +38,11 @@ class HostelRepository:
     def get_hostel_by_name(self, name: str) -> Hostel:
         return self.session.query(Hostel).filter(Hostel.name == name).first()
 
-    def get_hostel_by_owner_id(self, owner_id: int) -> Hostel:
+    def get_hostel_by_owner_id(self, owner_id: int):
         return self.session.query(Hostel).filter(Hostel.owner_id == owner_id).first()
+
+    def get_all_hostels_by_one_owner(self, owner_id: int):
+        return self.session.query(Hostel).filter(Hostel.owner_id == owner_id).all()
 
     def get_hostel_by_id(self, hostel_id) -> Hostel:
         return self.session.query(Hostel).filter(Hostel.id == hostel_id).first()

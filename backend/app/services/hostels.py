@@ -126,6 +126,41 @@ class HostelService:
         return JSONResponse("Hostel deleted successfully.")
 
 
+    async def get_all_my_hostels(self, current_user: User) -> HostelListResponse:
+
+        # check if user is a hostel owner
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User is not authorized to delete a hostel.")
+        # Retrieve the owner using user id
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel owner not found.")
+
+        # get the hostels by owner id
+        hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        if not hostels:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
+
+        hostel_responses = [
+            HostelResponse(
+                id=hostel.id,
+                name=hostel.name,
+                image_url=hostel.image_url,
+                description=hostel.description,
+                location=hostel.location,
+                owner_id=hostel.owner_id,
+                average_price=hostel.average_price,
+                available_rooms=hostel.available_rooms,
+                amenities=hostel.amenities,
+                created_at=hostel.created_at,
+                updated_at=hostel.updated_at,
+            )
+            for hostel in hostels
+        ]
+
+        # Return a single HostelListResponse with the list of HostelResponse
+        return HostelListResponse(hostels=hostel_responses)
 
     async def get_all_hostels(self) -> HostelListResponse:
         hostels =  self.hostel_repository.get_all_hostels()
