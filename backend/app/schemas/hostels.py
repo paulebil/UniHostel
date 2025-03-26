@@ -17,3 +17,9 @@ class HostelUpdateSchema(HostelCreateSchema):
     """
     Pydantic model for updating a hostel
     """
+
+class HostelSearchSchema(BaseModel):
+    """
+    Pydantic model for searching a hostel
+    """
+    query: constr(max_length=255, min_length=1)

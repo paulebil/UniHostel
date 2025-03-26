@@ -24,3 +24,12 @@ class HostelListResponse(BaseModel):
     Pydantic model for returning a list of hostels in API responses.
     """
     hostels: List[HostelResponse]
+
+class HostelSearchResponse(BaseModel):
+    """
+    Pydantic model for returning hostel search results
+    """
+    results: List[HostelResponse]
+
+
+

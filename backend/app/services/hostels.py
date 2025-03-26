@@ -184,3 +184,26 @@ class HostelService:
 
         # Return a single HostelListResponse with the list of HostelResponse
         return HostelListResponse(hostels=hostel_responses)
+
+    async def search_hostels(self, search_data: HostelSearchSchema) -> HostelSearchResponse:
+        results = self.hostel_repository.search_hostels(search_data.query)
+        if not results:
+            raise HTTPException(status_code=400, detail="No hostels found for this query")
+
+        hostels_data = [
+            HostelResponse(
+                id=hostel_data["hostel"].id,  #  Extract the actual Hostel object
+                name=hostel_data["hostel"].name,
+                image_url=hostel_data["hostel"].image_url,
+                description=hostel_data["highlighted_description"],  #  Use highlighted description
+                location=hostel_data["hostel"].location,
+                owner_id=hostel_data["hostel"].owner_id,
+                average_price=hostel_data["hostel"].average_price,
+                available_rooms=hostel_data["hostel"].available_rooms,
+                amenities=hostel_data["hostel"].amenities,
+                created_at=hostel_data["hostel"].created_at,
+                updated_at=hostel_data["hostel"].updated_at
+            ) for hostel_data in results  #  correctly iterating over dicts
+        ]
+
+        return HostelSearchResponse(results=hostels_data)

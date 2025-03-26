@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status
+from redis.commands.search.query import Query
 
 from backend.app.schemas.hostels import *
-from backend.app.responses.hostels import HostelListResponse, HostelResponse
+from backend.app.responses.hostels import *
 from backend.app.services.hostels import HostelService
 from backend.app.repository.hostels import HostelRepository
 from backend.app.repository.custodian import HostelOwnerRepository
@@ -22,7 +23,7 @@ hostel_router = APIRouter(
 
 hostel_user_router = APIRouter(
     prefix="/hostels",
-    tags=["Hostels"],
+    tags=["Hostels User"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -55,4 +56,8 @@ async def get_all_my_hostels(hostel_service: HostelService = Depends(get_hostel_
 @hostel_user_router.get("/all-hostels", status_code=status.HTTP_200_OK, response_model=HostelListResponse)
 async def get_all_hostels(hostel_service: HostelService = Depends(get_hostel_service)):
     return await hostel_service.get_all_hostels()
+
+@hostel_user_router.put("/search", status_code=status.HTTP_200_OK, response_model=HostelSearchResponse)
+async def search_hostels(query:HostelSearchSchema, hostel_service: HostelService = Depends(get_hostel_service)):
+    return await hostel_service.search_hostels(query)
 
