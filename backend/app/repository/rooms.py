@@ -31,5 +31,7 @@ class RoomsRepository:
         self.session.commit()
 
     def get_all_rooms(self):
-        self.session.query(Rooms).all()
+       return self.session.query(Rooms).all()
 
+    def get_room_by_room_number(self, room_number: str):
+        return self.session.query(Rooms).filter(Rooms.room_number == room_number).first()

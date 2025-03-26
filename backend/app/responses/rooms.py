@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class RoomResponse(BaseModel):
@@ -17,3 +17,5 @@ class RoomResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class AllRoomsResponse(BaseModel):
+    rooms: List[RoomResponse]

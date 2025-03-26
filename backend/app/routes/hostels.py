@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status
-from redis.commands.search.query import Query
 
 from backend.app.schemas.hostels import *
 from backend.app.responses.hostels import *
@@ -23,7 +22,7 @@ hostel_router = APIRouter(
 
 hostel_user_router = APIRouter(
     prefix="/hostels",
-    tags=["Hostels User"],
+    tags=["Students"],
     responses={404: {"description": "Not found"}},
 )
 
