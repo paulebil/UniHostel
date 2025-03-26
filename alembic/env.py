@@ -5,9 +5,9 @@ from sqlalchemy import pool
 
 from alembic import context
 from backend.app.database.database import Base
-from backend.app.core.config import get_settings
-from backend.app.models.users import *
 from backend.app.models.hostels import *
+from backend.app.models.users import *
+from backend.app.core.config import get_settings
 
 settings = get_settings()
 

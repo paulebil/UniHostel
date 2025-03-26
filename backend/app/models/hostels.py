@@ -1,4 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime, func, Index, Float, Enum
+from sqlalchemy import (
+    Column, Integer, String, Text, Boolean, ForeignKey, DateTime, func,
+    Index, Computed, Float,Enum
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy import event
@@ -21,15 +24,18 @@ class Hostel(Base):
     average_price = Column(Integer, nullable=False)
     available_rooms = Column(Integer, nullable=False, default=0)
     amenities = Column(Text, nullable=True)
-    #is_available = Column(Boolean, default=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 
-    # Full-text search vector
-    search_vector = Column(TSVECTOR, server_default="")
+    # Full-text search vector (auto-updating)
+    search_vector = Column(
+        TSVECTOR,
+        Computed("to_tsvector('english', name || ' ' || location || ' ' || description || COALESCE(amenities, ''))",
+                 persisted=True)
+    )
 
     # Relationships
-    owner = relationship("User", back_populates="hostels")  # Links to User.hostels
+    owner = relationship("User", back_populates="hostels")
     rooms = relationship("Rooms", back_populates="hostel", cascade="all, delete-orphan")
 
     # Create GIN index for the search_vector column
@@ -37,14 +43,14 @@ class Hostel(Base):
         Index("fts_idx", "search_vector", postgresql_using="gin"),
     )
 
-# Register the DDL trigger via event listener
-@event.listens_for(Hostel.__table__, 'after_create')
-def create_trigger(target, connection, **kwargs):
-    connection.execute("""
-        CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
-        ON hostels FOR EACH ROW EXECUTE FUNCTION
-        tsvector_update_trigger(search_vector, 'pg_catalog.english', name, location, description, amenities);
-    """)
+# # Register the DDL trigger via event listener
+# @event.listens_for(Hostel.__table__, 'after_create')
+# def create_trigger(target, connection, **kwargs):
+#     connection.execute("""
+#         CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
+#         ON hostels FOR EACH ROW EXECUTE FUNCTION
+#         tsvector_update_trigger(search_vector, 'pg_catalog.english', name, location, description, amenities);
+#     """)
 
 class RoomType(enum.Enum):
     SINGLE = "single"
