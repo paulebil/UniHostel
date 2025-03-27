@@ -31,3 +31,7 @@ class RoomUpdateSchema(BaseModel):
     balcony: Optional[bool] = None
     image_url: Optional[str] = None
 
+
+class DeleteRoomSchema(BaseModel):
+    hostel_id: Optional[int] = None
+    room_number: Optional[str] = None

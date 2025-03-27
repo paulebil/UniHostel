@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from starlette.responses import JSONResponse
 
 from backend.app.models.hostels import Rooms
 from backend.app.repository.rooms import RoomsRepository
@@ -147,6 +148,36 @@ class RoomService:
             created_at=room.created_at,
             updated_at=room.updated_at
         )
+    async def delete_room(self, data: DeleteRoomSchema, current_user: User):
+        # Authorization check
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to delete a room")
+
+        # Fetch hostel owner
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="User is not registered as a hostel owner")
+
+        # Fetch owned hostels
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        if not owned_hostels:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User does not own any hostel")
+
+        # Validate hostel ownership
+        hostel_ids = {hostel.id for hostel in owned_hostels}  # Set for fast lookup
+
+        # Get room by room number and hostel_id
+        room = self.rooms_repository.get_room_by_room_number_and_hostel_id(data.room_number, data.hostel_id)
+        if not room or room.hostel_id not in hostel_ids:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="Room does not exist or does not belong to one of your hostels.")
+
+        # Delete room
+        self.rooms_repository.delete_room(room)
+
+        return JSONResponse(content={"message": "Room deleted successfully"}, status_code=status.HTTP_200_OK)
 
     async def get_all_rooms_by_hostel_id(self, hostel_id: int) -> AllRoomsResponse:
         rooms =  self.rooms_repository.get_all_rooms_by_hostel_id(hostel_id)
