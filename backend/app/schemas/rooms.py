@@ -35,3 +35,7 @@ class RoomUpdateSchema(BaseModel):
 class DeleteRoomSchema(BaseModel):
     hostel_id: Optional[int] = None
     room_number: Optional[str] = None
+
+class RoomRetrieveDetailSchema(BaseModel):
+    hostel_id: Optional[int] = None
+    room_number: Optional[str] = None

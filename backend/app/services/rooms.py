@@ -250,3 +250,24 @@ class RoomService:
         ]
 
         return AllRoomsResponse(rooms=rooms_response)
+
+    async def get_single_room_by_hostel_id(self, room_number: str, hostel_id: int) -> RoomResponse:
+        room = self.rooms_repository.get_room_by_room_number_and_hostel_id(room_number, hostel_id)
+        if not room:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+        return RoomResponse(
+            id=room.id,
+            hostel_id=room.hostel_id,
+            room_number=room.room_number,
+            price_per_semester=room.price_per_semester,
+            room_type=room.room_type.value,  # Convert Enum to string
+            availability=room.availability,
+            capacity=room.capacity,
+            bathroom=room.bathroom,
+            balcony=room.balcony,
+            image_url=room.image_url,
+            created_at=room.created_at,
+            updated_at=room.updated_at
+        )
+

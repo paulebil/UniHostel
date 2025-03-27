@@ -36,7 +36,7 @@ class RoomsRepository:
     def get_room_by_room_number(self, room_number: str):
         return self.session.query(Rooms).filter(Rooms.room_number == room_number).first()
 
-    def get_room_by_room_number_and_hostel_id(self, room_number:str,hostel_id:int):
+    def get_room_by_room_number_and_hostel_id(self, room_number:str, hostel_id:int):
         return self.session.query(Rooms).filter(
             Rooms.hostel_id == hostel_id,
             Rooms.room_number == room_number
