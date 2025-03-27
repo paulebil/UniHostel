@@ -243,3 +243,25 @@ class HostelService:
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
+
+    async def get_hostel_detail_user(self, hostel_id: int):
+
+        # Fetch the hostel details by hostel_id
+        hostel = self.hostel_repository.get_hostel_by_id(hostel_id)
+        if not hostel:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
+
+        # Return the hostel details in the response
+        return HostelResponse(
+            id=hostel.id,
+            name=hostel.name,
+            image_url=hostel.image_url,
+            description=hostel.description,
+            location=hostel.location,
+            owner_id=hostel.owner_id,
+            average_price=hostel.average_price,
+            available_rooms=hostel.available_rooms,
+            amenities=hostel.amenities,
+            created_at=hostel.created_at,
+            updated_at=hostel.updated_at,
+        )
