@@ -208,3 +208,38 @@ class HostelService:
 
         #  TODO: ADD PAGINATION
         return HostelSearchResponse(results=hostels_data)
+
+    async def get_hostel_detail(self, hostel_id: int, current_user: User):
+        # Check if user is a hostel owner
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User is not authorized to view hostel details.")
+
+        # Retrieve the hostel owner using user id
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel owner not found.")
+
+        # Fetch the hostel details by hostel_id
+        hostel = self.hostel_repository.get_hostel_by_id(hostel_id)
+        if not hostel:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
+
+        # Ensure the user is the owner of the hostel
+        if hostel.owner_id != owner.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this hostel.")
+
+        # Return the hostel details in the response
+        return HostelResponse(
+            id=hostel.id,
+            name=hostel.name,
+            image_url=hostel.image_url,
+            description=hostel.description,
+            location=hostel.location,
+            owner_id=hostel.owner_id,
+            average_price=hostel.average_price,
+            available_rooms=hostel.available_rooms,
+            amenities=hostel.amenities,
+            created_at=hostel.created_at,
+            updated_at=hostel.updated_at,
+        )
