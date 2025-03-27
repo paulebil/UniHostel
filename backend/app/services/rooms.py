@@ -271,3 +271,46 @@ class RoomService:
             updated_at=room.updated_at
         )
 
+    async def get_single_room_by_hostel_id_custodian(self, room_number: str, hostel_id: int,
+                                                     current_user: User) -> RoomResponse:
+        # Authorization check: Verify if user is a hostel owner
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to view rooms")
+
+        # Fetch hostel owner from the repository
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="User is not registered as a hostel owner")
+
+        # Fetch owned hostels
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        if not owned_hostels:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User does not own any hostel")
+
+        # Validate hostel ownership
+        hostel_ids = {hostel.id for hostel in owned_hostels}  # Set for fast lookup
+        if hostel_id not in hostel_ids:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this hostel")
+
+        # Fetch the room by room number and hostel ID
+        room = self.rooms_repository.get_room_by_room_number_and_hostel_id(room_number, hostel_id)
+        if not room:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+        # Return room details in the response
+        return RoomResponse(
+            id=room.id,
+            hostel_id=room.hostel_id,
+            room_number=room.room_number,
+            price_per_semester=room.price_per_semester,
+            room_type=room.room_type.value,  # Convert Enum to string
+            availability=room.availability,
+            capacity=room.capacity,
+            bathroom=room.bathroom,
+            balcony=room.balcony,
+            image_url=room.image_url,
+            created_at=room.created_at,
+            updated_at=room.updated_at
+        )
