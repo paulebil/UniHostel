@@ -81,6 +81,72 @@ class RoomService:
             updated_at=room.updated_at
         )
 
+    async def update_room(self, data: RoomUpdateSchema, current_user: User) -> RoomResponse:
+        # Authorization check
+        if not current_user.hostel_owner:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to update a room")
+
+        # Fetch hostel owner
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="User is not registered as a hostel owner")
+
+        # Fetch owned hostels
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        if not owned_hostels:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="User does not own any hostel")
+
+        # Validate hostel ownership
+        hostel_ids = {hostel.id for hostel in owned_hostels}  # Set for fast lookup
+
+        # Get room by room number
+        room = self.rooms_repository.get_room_by_room_number(data.room_number)
+        if not room or room.hostel_id not in hostel_ids:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="Room does not exist or does not belong to one of your hostels.")
+
+        # Update room details (allow False/0 values)
+        if data.hostel_id is not None:
+            room.hostel_id = data.hostel_id
+        if data.room_number is not None:
+            room.room_number = data.room_number
+        if data.price_per_semester is not None:
+            room.price_per_semester = data.price_per_semester
+        if data.room_type is not None:
+            room.room_type = data.room_type
+        if data.availability is not None:
+            room.availability = data.availability
+        if data.capacity is not None:
+            room.capacity = data.capacity
+        if data.bathroom is not None:
+            room.bathroom = data.bathroom
+        if data.balcony is not None:
+            room.balcony = data.balcony
+        if data.image_url is not None:
+            room.image_url = data.image_url
+
+        room.updated_at = datetime.now()
+
+        # Save updates
+        self.rooms_repository.update_room(room)
+
+        # Return updated room details
+        return RoomResponse(
+            id=room.id,
+            hostel_id=room.hostel_id,
+            room_number=room.room_number,
+            price_per_semester=room.price_per_semester,
+            room_type=room.room_type.value,  # Convert Enum to string
+            availability=room.availability,
+            capacity=room.capacity,
+            bathroom=room.bathroom,
+            balcony=room.balcony,
+            image_url=room.image_url,
+            created_at=room.created_at,
+            updated_at=room.updated_at
+        )
 
     async def get_all_rooms(self) -> AllRoomsResponse:
         rooms =  self.rooms_repository.get_all_rooms()

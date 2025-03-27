@@ -4,8 +4,8 @@ from typing import Optional
 import enum
 
 class RoomType(str,enum.Enum):
-    SINGLE = "SINGLE"
     DOUBLE = "DOUBLE"
+    SINGLE = "SINGLE"
 
 
 class RoomCreateSchema(BaseModel):
@@ -18,8 +18,7 @@ class RoomCreateSchema(BaseModel):
     bathroom: bool = False
     balcony: bool = False
     image_url: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+
 
 class RoomUpdateSchema(BaseModel):
     hostel_id: Optional[int] = None
@@ -31,4 +30,4 @@ class RoomUpdateSchema(BaseModel):
     bathroom: Optional[bool] = None
     balcony: Optional[bool] = None
     image_url: Optional[str] = None
-    updated_at: datetime = Field(default_factory=datetime.now)
+

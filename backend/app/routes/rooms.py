@@ -33,10 +33,15 @@ def get_rooms_service(session: Session = Depends(get_session)) -> RoomService:
     hostel_owner_repository = HostelOwnerRepository(session)
     return RoomService(room_repository, hostel_repository, hostel_owner_repository)
 
-@room_router.put("/create", status_code=status.HTTP_201_CREATED, response_model=RoomResponse)
+@room_router.post("/create", status_code=status.HTTP_201_CREATED, response_model=RoomResponse)
 async def create_room(data: RoomCreateSchema, room_service: RoomService = Depends(get_rooms_service),
                       current_user = Depends(security.get_current_user)):
     return await room_service.create_room(data, current_user)
+
+@room_router.put("/update", status_code=status.HTTP_200_OK, response_model=RoomResponse)
+async def update_room(data: RoomUpdateSchema, room_service: RoomService = Depends(get_rooms_service),
+                      current_user = Depends(security.get_current_user)):
+    return await room_service.update_room(data, current_user)
 
 @room_user_router.get("/get-all-rooms", status_code=status.HTTP_200_OK, response_model=AllRoomsResponse)
 async def get_all_rooms(room_service: RoomService = Depends(get_rooms_service)):
