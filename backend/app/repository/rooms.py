@@ -30,8 +30,8 @@ class RoomsRepository:
         self.session.delete(room)
         self.session.commit()
 
-    def get_all_rooms(self):
-       return self.session.query(Rooms).all()
+    def get_all_rooms_by_hostel_id(self, hostel_id: int):
+       return self.session.query(Rooms).filter(Rooms.hostel_id == hostel_id).all()
 
     def get_room_by_room_number(self, room_number: str):
         return self.session.query(Rooms).filter(Rooms.room_number == room_number).first()

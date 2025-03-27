@@ -148,8 +148,8 @@ class RoomService:
             updated_at=room.updated_at
         )
 
-    async def get_all_rooms(self) -> AllRoomsResponse:
-        rooms =  self.rooms_repository.get_all_rooms()
+    async def get_all_rooms_by_hostel_id(self, hostel_id: int) -> AllRoomsResponse:
+        rooms =  self.rooms_repository.get_all_rooms_by_hostel_id(hostel_id)
 
         if not rooms:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Rooms not found")

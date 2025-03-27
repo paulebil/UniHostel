@@ -44,5 +44,5 @@ async def update_room(data: RoomUpdateSchema, room_service: RoomService = Depend
     return await room_service.update_room(data, current_user)
 
 @room_user_router.get("/get-all-rooms", status_code=status.HTTP_200_OK, response_model=AllRoomsResponse)
-async def get_all_rooms(room_service: RoomService = Depends(get_rooms_service)):
-    return await room_service.get_all_rooms()
+async def get_all_rooms_in_a_hostel(hostel_id: int, room_service: RoomService = Depends(get_rooms_service)):
+    return await room_service.get_all_rooms_by_hostel_id(hostel_id)
