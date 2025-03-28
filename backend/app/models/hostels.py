@@ -36,7 +36,7 @@ class Hostel(Base):
 
     # Relationships
     owner = relationship("User", back_populates="hostels")
-    rooms = relationship("Rooms", back_populates="hostel", cascade="all, delete-orphan")
+    rooms = relationship("Room", back_populates="hostel", cascade="all, delete-orphan")
     bookings = relationship("Booking", back_populates="hostel", cascade="all, delete-orphan")
 
     # Create GIN index for the search_vector column
@@ -72,6 +72,7 @@ class Room(Base):
     room_type = Column(Enum(RoomType), nullable=False, default=RoomType.DOUBLE)
     availability = Column(Boolean, default=True)
     capacity = Column(Integer, nullable=False, default=2)
+    occupancy = Column(Integer, nullable=True, default=0)
     bathroom = Column(Boolean, nullable=False,default=False)
     balcony = Column(Boolean, nullable=False, default=False)
     image_url = Column(String(255), nullable=True)

@@ -18,10 +18,10 @@ class Booking(Base):
 
     # Student Information
     student_name = Column(String(100), nullable=False)
-    student_email = Column(String(100), nullable=False, index=True, unique=True)
+    student_email = Column(String(100), nullable=False, index=True)
     student_phone = Column(String(20), nullable=False)
     student_university = Column(String(100), nullable=False)
-    Student_course = Column(String(100), nullable=False)
+    student_course = Column(String(100), nullable=False)
     student_study_year = Column(String(50), nullable=False)
 
     # Home residence information

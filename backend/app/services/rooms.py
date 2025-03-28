@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from starlette.responses import JSONResponse
+from fastapi.responses import JSONResponse
 
 from backend.app.models.hostels import Room
 from backend.app.repository.rooms import RoomsRepository
