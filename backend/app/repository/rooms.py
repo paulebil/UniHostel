@@ -2,13 +2,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 
-from backend.app.models.hostels import Rooms
+from backend.app.models.hostels import Room
 
 class RoomsRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create_room(self, room: Rooms):
+    def create_room(self, room: Room):
         try:
             self.session.add(room)
             self.session.commit()
@@ -17,7 +17,7 @@ class RoomsRepository:
             self.session.rollback()
             raise
 
-    def update_room(self, room: Rooms):
+    def update_room(self, room: Room):
         try:
             self.session.merge(room)
             self.session.commit()
@@ -26,18 +26,18 @@ class RoomsRepository:
             self.session.rollback()
             raise
 
-    def delete_room(self, room: Rooms):
+    def delete_room(self, room: Room):
         self.session.delete(room)
         self.session.commit()
 
     def get_all_rooms_by_hostel_id(self, hostel_id: int):
-       return self.session.query(Rooms).filter(Rooms.hostel_id == hostel_id).all()
+       return self.session.query(Room).filter(Room.hostel_id == hostel_id).all()
 
     def get_room_by_room_number(self, room_number: str):
-        return self.session.query(Rooms).filter(Rooms.room_number == room_number).first()
+        return self.session.query(Room).filter(Room.room_number == room_number).first()
 
     def get_room_by_room_number_and_hostel_id(self, room_number:str, hostel_id:int):
-        return self.session.query(Rooms).filter(
-            Rooms.hostel_id == hostel_id,
-            Rooms.room_number == room_number
+        return self.session.query(Room).filter(
+            Room.hostel_id == hostel_id,
+            Room.room_number == room_number
         ).first()

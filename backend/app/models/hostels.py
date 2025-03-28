@@ -37,6 +37,7 @@ class Hostel(Base):
     # Relationships
     owner = relationship("User", back_populates="hostels")
     rooms = relationship("Rooms", back_populates="hostel", cascade="all, delete-orphan")
+    bookings = relationship("Booking", back_populates="hostel", cascade="all, delete-orphan")
 
     # Create GIN index for the search_vector column
     __table_args__ = (
@@ -57,7 +58,7 @@ class RoomType(enum.Enum):
     DOUBLE = "double"
 
 
-class Rooms(Base):
+class Room(Base):
     """
     Represents a room in a hostel
     """
@@ -79,4 +80,7 @@ class Rooms(Base):
 
     # Relationship to hostel (a room belongs to a hostel)
     hostel = relationship("Hostel", back_populates="rooms")
+    bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
+
+
 

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
-from backend.app.models.hostels import Rooms
+from backend.app.models.hostels import Room
 from backend.app.repository.rooms import RoomsRepository
 from backend.app.schemas.rooms import *
 from backend.app.responses.rooms import *
@@ -49,7 +49,7 @@ class RoomService:
                                 detail="Room with this number already exists.")
 
         # Create room instance
-        room = Rooms(
+        room = Room(
             hostel_id=data.hostel_id,
             room_number=data.room_number,
             price_per_semester=data.price_per_semester,
