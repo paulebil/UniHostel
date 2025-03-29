@@ -117,6 +117,29 @@ class BookingService:
 
         return JSONResponse(content={"message": "Booking updated successfully"})
 
+    async def cancel_booking(self, booking_id: int):
+
+        booking = self.booking_repository.get_booking_by_booking_id(booking_id)
+
+        if not booking:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+
+        if not booking.room_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room for this booking not found.")
+
+        room = self.room_repository.get_room_by_id(booking.room_id)
+
+        room.occupancy -= 1
+
+        self.room_repository.update_room(room)
+
+        # Cancel the booking
+        self.booking_repository.delete_booking(booking)
+
+        # TODO: Send email notification to the student
+
+        return JSONResponse("Booking canceled successfully.")
+
 
 
 

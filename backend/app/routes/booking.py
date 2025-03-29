@@ -28,3 +28,8 @@ async def create_booking(data: BookingCreateSchema, booking_service: BookingServ
 @booking_user_router.put("/update", status_code=status.HTTP_200_OK, response_model=BookingResponseSchema)
 async def update_booking(data: BookingUpdateSchema, booking_service: BookingService = Depends(get_booking_service)):
     return await booking_service.update_booking(data)
+
+@booking_user_router.delete("/cancel", status_code=status.HTTP_200_OK )
+async def cancel_booking(booking_id: int, booking_service: BookingService = Depends(get_booking_service)):
+    return await booking_service.cancel_booking(booking_id)
+
