@@ -9,6 +9,8 @@ from backend.app.schemas.booking import *
 from backend.app.core.security import Security
 from backend.app.database.database import get_session
 
+from typing import List
+
 from sqlalchemy.orm import Session
 
 booking_user_router = APIRouter(
@@ -33,3 +35,10 @@ async def update_booking(data: BookingUpdateSchema, booking_service: BookingServ
 async def cancel_booking(booking_id: int, booking_service: BookingService = Depends(get_booking_service)):
     return await booking_service.cancel_booking(booking_id)
 
+@booking_user_router.get("/booking", status_code=status.HTTP_200_OK, response_model=BookingResponseSchema)
+async def get_booking_by_id(booking_id: int, booking_service: BookingService = Depends(get_booking_service)):
+    return await booking_service.get_booking_by_id(booking_id)
+
+@booking_user_router.get("/bookings", status_code=status.HTTP_200_OK, response_model=List[BookingResponseSchema])
+async def get_all_my_bookings(email: str, booking_service: BookingService = Depends(get_booking_service)):
+    return await booking_service.get_all_my_bookings(email)

@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from datetime import datetime
 
+from typing import List
+
 from starlette.responses import JSONResponse
 
 from backend.app.repository.booking import BookingRepository
@@ -139,6 +141,75 @@ class BookingService:
         # TODO: Send email notification to the student
 
         return JSONResponse("Booking canceled successfully.")
+
+    async def get_booking_by_id(self, booking_id: int) -> BookingResponseSchema:
+
+        booking = self.booking_repository.get_booking_by_booking_id(booking_id)
+
+        if not booking:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking by user not found")
+
+        booking = BookingResponseSchema(
+            id=booking.id,
+            student_name=booking.student_name,
+            student_email=booking.student_email,
+            student_phone=booking.student_phone,
+            student_course=booking.student_course,
+            student_study_year=booking.student_study_year,
+            student_university=booking.student_university,
+
+            home_address=booking.home_address,
+            home_district=booking.home_district,
+            home_country=booking.home_country,
+
+            next_of_kin_name=booking.next_of_kin_name,
+            next_of_kin_phone=booking.next_of_kin_phone,
+            kin_relationship=booking.kin_relationship,
+
+            hostel_id=booking.hostel_id,
+            room_id=booking.room_id,
+            status=booking.status,
+
+            created_at=booking.created_at,
+            updated_at=booking.updated_at
+        )
+
+        return booking
+
+    async def get_all_my_bookings(self, email: str) -> List[BookingResponseSchema]:
+        bookings = self.booking_repository.get_all_my_bookings(email)
+
+        if not bookings:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bookings by student email not found")
+
+        bookings = [BookingResponseSchema(
+            id=booking.id,
+            student_name=booking.student_name,
+            student_email=booking.student_email,
+            student_phone=booking.student_phone,
+            student_course=booking.student_course,
+            student_study_year=booking.student_study_year,
+            student_university=booking.student_university,
+
+            home_address=booking.home_address,
+            home_district=booking.home_district,
+            home_country=booking.home_country,
+
+            next_of_kin_name=booking.next_of_kin_name,
+            next_of_kin_phone=booking.next_of_kin_phone,
+            kin_relationship=booking.kin_relationship,
+
+            hostel_id=booking.hostel_id,
+            room_id=booking.room_id,
+            status=booking.status,
+
+            created_at=booking.created_at,
+            updated_at=booking.updated_at
+        ) for booking in bookings]
+
+        return bookings
+
+
 
 
 
