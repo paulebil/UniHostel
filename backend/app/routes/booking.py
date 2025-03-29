@@ -62,3 +62,9 @@ async def get_all_my_bookings(email: str, booking_service: BookingService = Depe
 async def get_all_bookings_for_hostel(hostel_id: int, booking_service: BookingService = Depends(get_booking_service),
                                       current_user = Depends(security.get_current_user)):
     return await booking_service.get_all_room_booking_by_hostel(hostel_id, current_user)
+
+@booking_router.get("/booking", status_code=status.HTTP_200_OK, response_model=BookingResponseSchema)
+async def get_single_booking_for_hostel(hostel_id: int, booking_id: int, booking_service: BookingService = Depends(get_booking_service),
+                                        current_user = Depends(security.get_current_user)):
+    return await booking_service.get_one_room_booking_for_hostel(hostel_id, booking_id, current_user)
+

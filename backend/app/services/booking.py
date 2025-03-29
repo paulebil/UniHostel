@@ -225,8 +225,6 @@ class BookingService:
                 detail="User is not registered as a hostel owner."
             )
 
-        print(f"Reached here, Owner found: {owner.business_name}")
-
         # Fetch owned hostels
         owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
         if not owned_hostels:
@@ -234,8 +232,6 @@ class BookingService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User does not own any hostels."
             )
-
-        print("Found hostels owned by this owner")
 
         # Verify the requested hostel_id belongs to the owner
         hostel_ids = {hostel.id for hostel in owned_hostels}
@@ -252,8 +248,6 @@ class BookingService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No bookings found for this hostel."
             )
-
-        print("Found bookings")
 
         # Convert to response schema
         return [
@@ -279,4 +273,60 @@ class BookingService:
             )
             for booking in bookings
         ]
+
+    async def get_one_room_booking_for_hostel(self, hostel_id: int, booking_id: int, current_user: User) -> BookingResponseSchema:
+        # Ensure user is a hostel owner
+        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
+        if not owner:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User is not registered as a hostel owner."
+            )
+
+        # Fetch owned hostels
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        if not owned_hostels:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User does not own any hostels."
+            )
+
+        # Verify the requested hostel_id belongs to the owner
+        hostel_ids = {hostel.id for hostel in owned_hostels}
+        if hostel_id not in hostel_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this hostel's bookings."
+            )
+
+        # Fetch room booking
+        booking = self.booking_repository.get_booking_by_booking_id(booking_id)
+
+        if not booking or booking.hostel_id != hostel_id:  # Ensure the booking belongs to the specified hostel
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No booking found for this hostel."
+            )
+
+        # Convert to response schema
+        return BookingResponseSchema(
+                id=booking.id,
+                student_name=booking.student_name,
+                student_email=booking.student_email,
+                student_phone=booking.student_phone,
+                student_course=booking.student_course,
+                student_study_year=booking.student_study_year,
+                student_university=booking.student_university,
+                home_address=booking.home_address,
+                home_district=booking.home_district,
+                home_country=booking.home_country,
+                next_of_kin_name=booking.next_of_kin_name,
+                next_of_kin_phone=booking.next_of_kin_phone,
+                kin_relationship=booking.kin_relationship,
+                hostel_id=booking.hostel_id,
+                room_id=booking.room_id,
+                status=booking.status,
+                created_at=booking.created_at,
+                updated_at=booking.updated_at
+        )
 
