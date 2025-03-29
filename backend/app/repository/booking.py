@@ -36,5 +36,5 @@ class BookingRepository:
     def get_all_my_bookings(self, student_email: str):
         return self.session.query(Booking).filter(Booking.student_email == student_email).all()
 
-    def get_all_hostel_room_booking(self):
-        return self.session.query(Booking).all()
+    def get_all_room_booking_by_hostel_id(self, hostel_id: int):
+        return self.session.query(Booking).filter(Booking.hostel_id == hostel_id).all()

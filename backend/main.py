@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from backend.app.routes.users import user_router, auth_router, guest_router, admin_router
 from backend.app.routes.hostels import hostel_router, hostel_user_router
 from backend.app.routes.rooms import room_router, room_user_router
-from backend.app.routes.booking import booking_user_router
+from backend.app.routes.booking import booking_user_router, booking_router
 
 
 def create_application():
@@ -23,6 +23,7 @@ def create_application():
 
     # Booking
     application.include_router(booking_user_router)
+    application.include_router(booking_router)
 
     return application
 
