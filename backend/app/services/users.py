@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from fastapi import HTTPException, BackgroundTasks, Depends
+from fastapi import HTTPException, BackgroundTasks, Depends, status
 from sqlalchemy.orm import Session, joinedload
 from starlette.responses import JSONResponse
 
@@ -153,7 +153,9 @@ class UserService:
             return user
         raise HTTPException(status_code=400, detail="User does not exist.")
 
-    async def fetch_all_users(self):
+    async def fetch_all_users(self, current_user: User):
+        if not current_user.role == UserRole.ADMIN.value:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not an admin to access this route")
         users = self.user_repository.get_all_users()
         return [
             AllUserResponse(

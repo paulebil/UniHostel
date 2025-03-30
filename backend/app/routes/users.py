@@ -134,5 +134,5 @@ async def get_owner(email: str, hostel_owner_service: HostelOwnerService = Depen
     return await hostel_owner_service.get_hostel_owner_information(email)
 
 @admin_router.get("/users", response_model=list[AllUserResponse])
-async def get_all_users(user_service: UserService = Depends(get_user_service)):
-    return await user_service.fetch_all_users()
+async def get_all_users(user_service: UserService = Depends(get_user_service), current_user = Depends(security.get_current_user)):
+    return await user_service.fetch_all_users(current_user)
