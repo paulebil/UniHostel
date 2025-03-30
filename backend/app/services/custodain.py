@@ -4,6 +4,8 @@ from backend.app.repository.users import UserRepository
 from backend.app.schemas.custodian import *
 from backend.app.responses.custodian import *
 
+from backend.app.schemas.users import UserRole
+
 from fastapi import HTTPException
 
 
@@ -29,7 +31,9 @@ class HostelOwnerService:
 
         self.hostel_owner_repository.create_hostel_owner(owner)
 
-
+        # Update user role
+        corresponding_user.role = UserRole.HOSTEL_OWNER.value
+        self.user_repository.update_user(corresponding_user)
 
         hostel_owner_response = HostelOwnerResponse(
             id=corresponding_user.id,
