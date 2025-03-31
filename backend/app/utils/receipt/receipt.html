@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniHostel Booking Receipt</title>
+     <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="receipt">
+        <div class="header">
+            <div class="logo">UniHostel</div>
+            <div class="date">
+                <p>Date: <strong>{{ created_at }}</strong></p>
+                <p>Receipt #: <strong>{{ receipt_number }}</strong></p>
+            </div>
+        </div>
+
+        <div class="details">
+            <h3>Booking Details</h3>
+            <p><strong>Hostel Name:</strong> {{ hostel_name }}</p>
+            <p><strong>Room Number:</strong> {{ room_number }}</p>
+            <p><strong>Booking Duration:</strong> {{ duration }} months</p>
+            <p><strong>Booking Status:</strong> {{ status }}</p>
+        </div>
+
+        <div class="details">
+            <h3>Student Information</h3>
+            <p><strong>Name:</strong> {{ student_name }}</p>
+            <p><strong>Email:</strong> {{ student_email }}</p>
+            <p><strong>Phone:</strong> {{ student_phone }}</p>
+            <p><strong>University:</strong> {{ student_university }}</p>
+            <p><strong>Course:</strong> {{ student_course }}</p>
+            <p><strong>Study Year:</strong> {{ student_study_year }}</p>
+        </div>
+
+        <!-- <div class="details">
+            <h3>Home Residence</h3>
+            <p><strong>Address:</strong> {{ home_address }}</p>
+            <p><strong>District:</strong> {{ home_district }}</p>
+            <p><strong>Country:</strong> {{ home_country }}</p>
+        </div>
+
+        <div class="details">
+            <h3>Next of Kin</h3>
+            <p><strong>Name:</strong> {{ next_of_kin_name }}</p>
+            <p><strong>Phone:</strong> {{ next_of_kin_phone }}</p>
+            <p><strong>Relationship:</strong> {{ kin_relationship }}</p>
+        </div> -->
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Unit Price</th>
+                    <th>Qty</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Room Rent ({{ duration }} months)</td>
+                    <td>${{ room_price_per_month }}</td>
+                    <td>{{ duration }}</td>
+                    <td>${{ total_rent }}</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Security Deposit (Refundable)</td>
+                    <td>${{ security_deposit }}</td>
+                    <td>1</td>
+                    <td>${{ security_deposit }}</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Utility Fees</td>
+                    <td>${{ utility_fees }}</td>
+                    <td>1</td>
+                    <td>${{ utility_fees }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <p>Net total: <strong>${{ net_total }}</strong></p>
+            <p>Tax ({{ tax_percentage }}%): <strong>${{ tax_amount }}</strong></p>
+            <p class="total">Total Paid: <strong>${{ total_paid }}</strong></p>
+        </div>
+
+        <div class="details">
+            <p><strong>Payment Method:</strong> {{ payment_method }}</p>
+            <p><strong>Transaction ID:</strong> {{ transaction_id }}</p>
+        </div>
+
+        <div class="footer">
+            <p>Thank you for booking with UniHostel!</p>
+            <p>For inquiries, contact support@unihostel.com | +256-XXX-XXX-XXX</p>
+        </div>
+    </div>
+</body>
+</html>
+
