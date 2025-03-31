@@ -12,6 +12,7 @@ class HostelCreateSchema(BaseModel):
     average_price: conint(ge=1)
     available_rooms: conint(ge=0) = 0
     amenities: Optional[str] = None  # Change to str for consistency with Text field in DB
+    rules_and_regulations: Optional[str]
 
 class HostelUpdateSchema(HostelCreateSchema):
     """

@@ -33,6 +33,7 @@ class HostelService:
             owner_id=current_user.id,
             average_price=data.average_price,
             available_rooms=data.available_rooms,
+            rules_and_regulations=data.rules_and_regulations,
             amenities=data.amenities,
             created_at=datetime.now(),
             updated_at=datetime.now()
@@ -50,6 +51,7 @@ class HostelService:
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
+            rules_and_regulations=hostel.get_rules(),
             created_at=hostel.created_at,
             updated_at=hostel.updated_at
         )
@@ -98,6 +100,7 @@ class HostelService:
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
+            rules_and_regulations=hostel.get_rules(),
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
@@ -152,6 +155,7 @@ class HostelService:
                 owner_id=hostel.owner_id,
                 average_price=hostel.average_price,
                 available_rooms=hostel.available_rooms,
+                rules_and_regulations=hostel.get_rules(),
                 amenities=hostel.amenities,
                 created_at=hostel.created_at,
                 updated_at=hostel.updated_at,
@@ -176,6 +180,7 @@ class HostelService:
                 average_price=hostel.average_price,
                 available_rooms=hostel.available_rooms,
                 amenities=hostel.amenities,
+                rules_and_regulations=hostel.get_rules(),
                 created_at=hostel.created_at,
                 updated_at=hostel.updated_at,
             )
@@ -201,6 +206,7 @@ class HostelService:
                 average_price=hostel_data["hostel"].average_price,
                 available_rooms=hostel_data["hostel"].available_rooms,
                 amenities=hostel_data["hostel"].amenities,
+                rules_and_regulations=hostel_data["hostel"].get_rules(),
                 created_at=hostel_data["hostel"].created_at,
                 updated_at=hostel_data["hostel"].updated_at
             ) for hostel_data in results  #  correctly iterating over dicts
@@ -240,6 +246,7 @@ class HostelService:
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
+            rules_and_regulations=hostel.get_rules(),
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
@@ -262,6 +269,7 @@ class HostelService:
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
+            rules_and_regulations=hostel.get_rules(),
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )

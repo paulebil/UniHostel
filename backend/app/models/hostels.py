@@ -23,6 +23,7 @@ class Hostel(Base):
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # Links to User
     average_price = Column(Integer, nullable=False)
     available_rooms = Column(Integer, nullable=False, default=0)
+    rules_and_regulations = Column(Text, nullable=True)
     amenities = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
@@ -43,6 +44,14 @@ class Hostel(Base):
     __table_args__ = (
         Index("fts_idx", "search_vector", postgresql_using="gin"),
     )
+
+    def get_rules(self):
+        if self.rules_and_regulations:
+            # Split the string by commas, strip each rule of excess spaces,
+            # and convert each rule to sentence case.
+            return [rule.strip().capitalize() for rule in self.rules_and_regulations.split(',')]
+        return []
+
 
 # # Register the DDL trigger via event listener
 # @event.listens_for(Hostel.__table__, 'after_create')
@@ -82,6 +91,8 @@ class Room(Base):
     # Relationship to hostel (a room belongs to a hostel)
     hostel = relationship("Hostel", back_populates="rooms")
     bookings = relationship("Booking", back_populates="room", cascade="all, delete-orphan")
+
+
 
 
 

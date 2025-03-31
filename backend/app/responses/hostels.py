@@ -15,6 +15,7 @@ class HostelResponse(BaseModel):
     owner_id: conint(ge=1)
     average_price: conint(ge=1)
     available_rooms: conint(ge=0)
+    rules_and_regulations: List[str]
     amenities: Optional[str] = None  # Change to str for consistency with Text field in DB
     created_at: datetime  # Use datetime for proper date handling
     updated_at: Optional[datetime] = None  # Use datetime for proper date handling
