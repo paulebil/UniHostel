@@ -69,7 +69,7 @@ class RoomsRepository:
             self.session.commit()
             self.session.refresh(room)
 
-    def get_room_by_id(self, room_id: int):
+    def get_room_by_id(self, room_id: int) -> Room:
 
         # Fetch the room
         return self.session.query(Room).filter(Room.id == room_id).first()

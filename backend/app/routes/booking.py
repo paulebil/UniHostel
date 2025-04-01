@@ -11,6 +11,8 @@ from backend.app.schemas.booking import *
 from backend.app.core.security import Security
 from backend.app.database.database import get_session
 
+from backend.app.services.receipts import ReceiptService
+
 from typing import List
 
 from sqlalchemy.orm import Session
@@ -68,3 +70,14 @@ async def get_single_booking_for_hostel(hostel_id: int, booking_id: int, booking
                                         current_user = Depends(security.get_current_user)):
     return await booking_service.get_one_room_booking_for_hostel(hostel_id, booking_id, current_user)
 
+
+def get_receipt_service(session: Session = Depends(get_session)) -> ReceiptService:
+    booking_repository = BookingRepository(session)
+    room_repository = RoomsRepository(session)
+    hostel_repository = HostelRepository(session)
+    return ReceiptService(booking_repository, room_repository, hostel_repository)
+
+
+@booking_user_router.get("/receipt", status_code=status.HTTP_200_OK)
+async def get_booking_receipt(booking_id: int, receipt_service: ReceiptService = Depends(get_receipt_service)):
+    return await receipt_service.create_receipt(booking_id)

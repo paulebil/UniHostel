@@ -31,7 +31,7 @@ class ReceiptContext(BaseModel):
     kin_relationship: str
 
     # Pricing
-    room_price_per_month: float
+    room_price_per_semester: float
     total_rent: float
     security_deposit: float
     utility_fees: float

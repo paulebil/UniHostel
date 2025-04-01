@@ -30,7 +30,7 @@ class BookingRepository:
         self.session.delete(booking)
         self.session.commit()
 
-    def get_booking_by_booking_id(self, booking_id: int):
+    def get_booking_by_booking_id(self, booking_id: int) -> Booking:
         return self.session.query(Booking).filter(Booking.id == booking_id).first()
 
     def get_all_my_bookings(self, student_email: str):

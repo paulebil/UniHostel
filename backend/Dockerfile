@@ -8,10 +8,11 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Install system dependencies for psycopg2
+# Install system dependencies for psycopg2 and wkhtmltopdf
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    wkhtmltopdf \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
@@ -22,9 +23,6 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy project files (exclude .env and sensitive files)
 COPY . /usr/src/app/
-
-# Set permissions to ensure non-root access
-#RUN chown -R 1000:1000 /usr/src/app
 
 # Expose FastAPI port
 EXPOSE 8050
