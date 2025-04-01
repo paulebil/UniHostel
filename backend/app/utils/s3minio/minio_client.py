@@ -1,6 +1,7 @@
 from minio import Minio
 from backend.app.core.config import get_settings
 import io
+from datetime import timedelta
 
 settings = get_settings()
 
@@ -14,7 +15,7 @@ def ensure_bucket_exists(bucket_name: str):
         client.make_bucket(bucket_name)
         print(f"Created bucket: {bucket_name}")
 
-def get_presigned_url(bucket_name: str, object_name: str, expires):
+def get_presigned_url(bucket_name: str, object_name: str, expires: timedelta(minutes=5)):
 
     """Generated a presigned URL valid for `expires` seconds ."""
     url = client.presigned_get_object(bucket_name, object_name, expires=expires)

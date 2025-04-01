@@ -55,22 +55,25 @@ context = {
 
 # Load the Html template using Jinja2
 
-template_loader = jinja2.FileSystemLoader('./')
-template_env = jinja2.Environment(loader=template_loader)
+def generate_receipt_pdf(context):
+
+    template_loader = jinja2.FileSystemLoader('./')
+    template_env = jinja2.Environment(loader=template_loader)
 
 
-# Load the specific template file
-template = template_env.get_template("receipt.html")
+    # Load the specific template file
+    template = template_env.get_template("receipt.html")
 
 
-# Render the template with the provided context
-output_text = template.render(context)
+    # Render the template with the provided context
+    output_text = template.render(context)
 
-# configure pdfkit with the path to wkhtmltopdf
-config = pdfkit.configuration(wkhtmltopdf="/usr/bin/wkhtmltopdf")    # get this from the docker container
+    # configure pdfkit with the path to wkhtmltopdf
+    config = pdfkit.configuration(wkhtmltopdf="/usr/bin/wkhtmltopdf")    # get this from the docker container
 
-# Generate the PDF from the rendered HTML template and apply a CSS
-pdfkit.from_string(output_text, 'generated_receipt.pdf', configuration=config, css="/home/ebilpaul/PycharmProjects/UniHostel/backend/app/utils/receipt/styles.css")
+    # Generate the PDF from the rendered HTML template and apply a CSS
+    pdfkit.from_string(output_text, 'generated_receipt.pdf', configuration=config,
+               css="/home/ebilpaul/PycharmProjects/UniHostel/backend/app/utils/receipt/styles.css")
 
-print("Receipt PDF generated successfully!")
+    print("Receipt PDF generated successfully!")
 
