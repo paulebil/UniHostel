@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi.responses import JSONResponse
+from fastapi import BackgroundTasks
 
 from backend.app.utils.receipt.receipt_generator import generate_receipt_pdf
 from backend.app.schemas.receipts import ReceiptContext
@@ -18,7 +19,7 @@ class ReceiptService:
         self.booking_repository = booking_repository
         self.room_repository = room_repository
 
-    async def create_receipt(self, booking_id: int):
+    async def create_receipt(self, booking_id: int, background_tasks: BackgroundTasks):
         booking_data = self.booking_repository.get_booking_by_booking_id(booking_id)
 
         room_info = self.room_repository.get_room_by_id(booking_data.room_id)

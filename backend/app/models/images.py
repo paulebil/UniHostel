@@ -11,12 +11,22 @@ class ImageType(enum.Enum):
     ROOM = "room"
 
 class Image(Base):
+
+    __tablename__ = "images"
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    url = Column(String(255), nullable=False)
+    url = Column(String(255), nullable=True)
     image_type = Column(Enum(ImageType), nullable=False)
     hostel_id = Column(Integer, ForeignKey("hostels.id"), nullable=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=True)
     is_primary = Column(Boolean, default=False)
+
+    file_name = Column(String(50), nullable=True)
+    bucket_name = Column(String(50), nullable=True)
+    object_name = Column(String(50), nullable=True)
+    version_id = Column(String(50), nullable=True)
+    etag = Column(String(50), nullable=True)
+
     created_at = Column(DateTime, server_default=func.now())
 
     # Relationships
