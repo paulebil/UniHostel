@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, status
+from fastapi import BackgroundTasks
 
 from backend.app.repository.booking import BookingRepository
 from backend.app.repository.rooms import RoomsRepository
+from backend.app.repository.receipt import ReceiptRepository
 from backend.app.repository.custodian import HostelOwnerRepository
 from backend.app.repository.hostels import HostelRepository
 from backend.app.services.booking import BookingService
@@ -75,9 +77,10 @@ def get_receipt_service(session: Session = Depends(get_session)) -> ReceiptServi
     booking_repository = BookingRepository(session)
     room_repository = RoomsRepository(session)
     hostel_repository = HostelRepository(session)
-    return ReceiptService(booking_repository, room_repository, hostel_repository)
+    receipt_repository = ReceiptRepository(session)
+    return ReceiptService(booking_repository, room_repository, hostel_repository, receipt_repository)
 
 
 @booking_user_router.get("/receipt", status_code=status.HTTP_200_OK)
-async def get_booking_receipt(booking_id: int, receipt_service: ReceiptService = Depends(get_receipt_service)):
-    return await receipt_service.create_receipt(booking_id)
+async def get_booking_receipt(booking_id: int, background_tasks: BackgroundTasks, receipt_service: ReceiptService = Depends(get_receipt_service)):
+    return await receipt_service.create_receipt(booking_id, background_tasks )

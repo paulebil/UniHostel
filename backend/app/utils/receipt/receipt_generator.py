@@ -1,13 +1,20 @@
 from fastapi import BackgroundTasks
+from fastapi.responses import JSONResponse
+from datetime import datetime
 
 import jinja2
 import pdfkit
 import os
 import uuid
+
 from backend.app.utils.s3minio.minio_client import upload_file_to_minio
 
+from backend.app.repository.receipt import ReceiptRepository
+from backend.app.models.receipt import Receipt
+from backend.app.schemas.receipts import ReceiptStatus
 
-def generate_receipt_pdf(context, bucket_name):
+
+def generate_receipt_pdf(context, bucket_name , receipt_repository: ReceiptRepository):
 
     # Generate unique file name
     unique_id = str(uuid.uuid4())
@@ -40,11 +47,63 @@ def generate_receipt_pdf(context, bucket_name):
 
     print("Receipt PDF generated successfully!")
 
-    result = upload_file_to_minio(bucket_name, pdf_filename, pdf_path, content_type)
+    # Step 1: Create receipt record (Initial Status: PENDING)
+    receipt_metadata = Receipt(
+        status=ReceiptStatus.PENDING.value,
+        file_name=pdf_filename,
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
+    receipt_id = receipt_repository.create_receipt_metadata(receipt_metadata)
 
-    print(f" Bucket name: {result.bucket_name}; Object name: {result.object_name} Object version: {result.version_id}; Object etag: {result.etag}")
+    try:
+        # Step 2: Upload receipt to MinIO
+        result = upload_file_to_minio(bucket_name, pdf_filename, pdf_path, content_type)
 
+        print(f"Bucket: {result.bucket_name}, Object: {result.object_name}, Version: {result.version_id}, ETag: {result.etag}")
+
+        # Step 3: Fetch the receipt from DB before updating
+        receipt_record = receipt_repository.get_receipt_metadata_by_id(receipt_id)
+
+        if receipt_record:
+            receipt_record.status = ReceiptStatus.COMPLETED.value
+            receipt_record.bucket_name = result.bucket_name
+            receipt_record.object_name = result.object_name
+            receipt_record.version_id = result.version_id
+            receipt_record.etag = result.etag
+            receipt_record.updated_at = datetime.now()
+
+        else:
+            print(f"Error: Receipt with ID {receipt_id} not found!")
+            return
+
+    except Exception as e:
+        print(f"Error uploading to MinIO: {str(e)}")
+
+        # If upload fails, fetch receipt and mark as FAILED
+        receipt_record = receipt_repository.get_receipt_metadata_by_id(receipt_id)
+
+        if receipt_record:
+            receipt_record.status = ReceiptStatus.FAILED.value
+            receipt_record.updated_at = datetime.now()
+        else:
+            print(f"Error: Receipt with ID {receipt_id} not found!")
+            return
+
+    # Step 4: Save updated receipt record
+    receipt_repository.update_receipt_metadata(receipt_record)
+
+    print("Receipt updated successfully!")
+
+    # Step 5: Remove the generated PDF
     print(f"Removing the pdf: {pdf_path}")
     os.remove(pdf_path)
 
-    return result
+
+def generate_receipt_background(background_tasks: BackgroundTasks, context, bucket_name, receipt_repository: ReceiptRepository):
+    background_tasks.add_task(generate_receipt_pdf, context, bucket_name, receipt_repository)
+    return {"message": "Receipt generation started."}
+
+
+# TODO: Turn these functions to async
+

@@ -2,8 +2,9 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 from fastapi import BackgroundTasks
 
-from backend.app.utils.receipt.receipt_generator import generate_receipt_pdf
+from backend.app.utils.receipt.receipt_generator import generate_receipt_background
 from backend.app.schemas.receipts import ReceiptContext
+from backend.app.repository.receipt import ReceiptRepository
 
 
 from backend.app.repository.booking import BookingRepository
@@ -14,10 +15,11 @@ from backend.app.repository.hostels import HostelRepository
 class ReceiptService:
 
     def __init__(self, booking_repository: BookingRepository, room_repository: RoomsRepository,
-                hostel_repository: HostelRepository):
+                hostel_repository: HostelRepository, receipt_repository: ReceiptRepository):
         self.hostel_repository = hostel_repository
         self.booking_repository = booking_repository
         self.room_repository = room_repository
+        self.receipt_repository = receipt_repository
 
     async def create_receipt(self, booking_id: int, background_tasks: BackgroundTasks):
         booking_data = self.booking_repository.get_booking_by_booking_id(booking_id)
@@ -73,7 +75,7 @@ class ReceiptService:
         bucket = "python-test-bucket"
 
         # Proceed to generate receipt
-        result = generate_receipt_pdf(receipt_context, bucket)
+        generate_receipt_background(background_tasks, receipt_context,bucket, self.receipt_repository)
 
         # return json
         return JSONResponse("Receipt generated successfully.")

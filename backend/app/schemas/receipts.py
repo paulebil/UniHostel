@@ -1,3 +1,5 @@
+import enum
+
 from pydantic import BaseModel, EmailStr, constr
 from datetime import datetime
 
@@ -43,3 +45,8 @@ class ReceiptContext(BaseModel):
     # Payment Info
     payment_method: str
     transaction_id: str
+
+class ReceiptStatus(enum.Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"

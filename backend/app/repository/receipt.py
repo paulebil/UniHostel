@@ -13,6 +13,7 @@ class ReceiptRepository:
             self.session.add(receipt)
             self.session.commit()
             self.session.refresh(receipt)
+            return receipt.id
         except IntegrityError:
             self.session.rollback()
             raise
