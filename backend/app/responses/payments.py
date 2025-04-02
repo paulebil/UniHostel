@@ -20,5 +20,5 @@ class PaymentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class AllPaymentResponse(PaymentResponse):
-    payments = List[PaymentResponse]
+class AllPaymentResponse(BaseModel):
+    payments: List[PaymentResponse]

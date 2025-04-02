@@ -10,16 +10,19 @@ from backend.app.repository.receipt import ReceiptRepository
 from backend.app.repository.booking import BookingRepository
 from backend.app.repository.rooms import RoomsRepository
 from backend.app.repository.hostels import HostelRepository
+from backend.app.repository.payments import PaymentRepository
 
 
 class ReceiptService:
 
     def __init__(self, booking_repository: BookingRepository, room_repository: RoomsRepository,
-                hostel_repository: HostelRepository, receipt_repository: ReceiptRepository):
+                hostel_repository: HostelRepository, receipt_repository: ReceiptRepository,
+                 payment_repository: PaymentRepository):
         self.hostel_repository = hostel_repository
         self.booking_repository = booking_repository
         self.room_repository = room_repository
         self.receipt_repository = receipt_repository
+        self.payment_repository = payment_repository
 
     async def create_receipt(self, booking_id: int, background_tasks: BackgroundTasks):
         booking_data = self.booking_repository.get_booking_by_booking_id(booking_id)
@@ -27,6 +30,8 @@ class ReceiptService:
         room_info = self.room_repository.get_room_by_id(booking_data.room_id)
 
         hostel_info = self.hostel_repository.get_hostel_by_id(booking_data.hostel_id)
+
+        payment_info = self.payment_repository.get_payment_by_booking_id(booking_id)
 
         receipt_context = ReceiptContext(
             # Receipt information
@@ -37,7 +42,7 @@ class ReceiptService:
             hostel_name=hostel_info.name,  ## check this
             room_number=room_info.room_number,
             duration=0,
-            status="",
+            status=booking_data.status,
 
             # Student Information
             student_name=booking_data.student_name,
@@ -59,17 +64,11 @@ class ReceiptService:
 
             # Pricing
             room_price_per_semester=room_info.price_per_semester,
-            total_rent=0.0,
-            security_deposit=0.0,
-            utility_fees=0.0,
-            tax_percentage=0.0,
-            tax_amount=0.0,
-            net_total=0.0,
-            total_paid=0.0,
 
             # Payment information
-            payment_method="",
-            transaction_id=""
+            payment_method=payment_info.payment_method,
+            transaction_id=payment_info.transaction_id,
+            security_deposit = payment_info.amount
         )
 
         bucket = "python-test-bucket"

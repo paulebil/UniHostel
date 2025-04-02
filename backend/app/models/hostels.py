@@ -85,6 +85,7 @@ class Room(Base):
     bathroom = Column(Boolean, nullable=False,default=False)
     balcony = Column(Boolean, nullable=False, default=False)
     image_url = Column(String(255), nullable=True)
+    booked_status = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 

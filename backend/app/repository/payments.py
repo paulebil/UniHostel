@@ -26,8 +26,11 @@ class PaymentRepository:
             self.session.rollback()
             raise
 
-    def get_payment_by_id(self, payment_id: int):
+    def get_payment_by_id(self, payment_id: int) -> Payment:
         return self.session.query(Payment).filter(Payment.id == payment_id).first()
 
-    def get_payment_by_transaction_id(self, transaction_id: str):
+    def get_payment_by_transaction_id(self, transaction_id: str) -> Payment:
         return self.session.query(Payment).filter(Payment.transaction_id == transaction_id).first()
+
+    def get_payment_by_booking_id(self, booking_id: int) -> Payment:
+        return self.session.query(Payment).filter(Payment.booking_id == booking_id).first()

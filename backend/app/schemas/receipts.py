@@ -34,17 +34,11 @@ class ReceiptContext(BaseModel):
 
     # Pricing
     room_price_per_semester: float
-    total_rent: float
-    security_deposit: float
-    utility_fees: float
-    tax_percentage: float
-    tax_amount: float
-    net_total: float
-    total_paid: float
 
     # Payment Info
     payment_method: str
     transaction_id: str
+    security_deposit: float
 
 class ReceiptStatus(enum.Enum):
     PENDING = "PENDING"

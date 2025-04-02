@@ -6,6 +6,10 @@ from backend.app.repository.rooms import RoomsRepository
 from backend.app.repository.receipt import ReceiptRepository
 from backend.app.repository.custodian import HostelOwnerRepository
 from backend.app.repository.hostels import HostelRepository
+from backend.app.repository.payments import PaymentRepository
+from backend.app.services.payments import PaymentService
+from backend.app.schemas.payments import *
+from backend.app.responses.payments import *
 from backend.app.services.booking import BookingService
 from backend.app.responses.booking import *
 from backend.app.schemas.booking import *
@@ -78,9 +82,24 @@ def get_receipt_service(session: Session = Depends(get_session)) -> ReceiptServi
     room_repository = RoomsRepository(session)
     hostel_repository = HostelRepository(session)
     receipt_repository = ReceiptRepository(session)
-    return ReceiptService(booking_repository, room_repository, hostel_repository, receipt_repository)
+    payment_repository = PaymentRepository(session)
+    return ReceiptService(booking_repository, room_repository, hostel_repository, receipt_repository, payment_repository)
 
 
 @booking_user_router.get("/receipt", status_code=status.HTTP_200_OK)
 async def get_booking_receipt(booking_id: int, background_tasks: BackgroundTasks, receipt_service: ReceiptService = Depends(get_receipt_service)):
     return await receipt_service.create_receipt(booking_id, background_tasks )
+
+
+def get_payment_service(session: Session = Depends(get_session)) -> PaymentService:
+    payment_repository = PaymentRepository(session)
+    booking_repository = BookingRepository(session)
+    room_repository = RoomsRepository(session)
+    hostel_repository = HostelRepository(session)
+
+    return PaymentService(payment_repository, booking_repository, room_repository)
+
+
+@booking_user_router.post("/payment", status_code=status.HTTP_200_OK)
+async def make_payment(data: PaymentCreate, payment_service: PaymentService = Depends(get_payment_service)):
+    return await payment_service.create_payment(data)
