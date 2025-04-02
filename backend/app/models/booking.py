@@ -48,3 +48,5 @@ class Booking(Base):
     # Relationships
     hostel = relationship("Hostel", back_populates="bookings")
     room = relationship("Room", back_populates="bookings")
+    payments = relationship("Payment", back_populates="booking")
+    stripe_payments = relationship("StripePayment", back_populates="booking")
