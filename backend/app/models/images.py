@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Boolean, DateTime, func
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Boolean, DateTime, func, Float
 from sqlalchemy.orm import relationship
+from datetime import datetime
 import enum
 
 
@@ -62,3 +63,19 @@ class Image(Base):
             session.commit()
             return primary_image
         return None
+
+class PDFDocumentMetadata(Base):
+    __tablename__ = 'pdf_documents'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    file_name = Column(String, nullable=False)
+    minio_url = Column(String, nullable=False)
+    content_type = Column(String, nullable=False)  # e.g., 'application/pdf'
+    bucket_name = Column(String(50), nullable=True)
+    object_name = Column(String(50), nullable=True)
+    version_id = Column(String(50), nullable=True)
+    etag = Column(String(50), nullable=True)
+    uploaded_at = Column(DateTime, default=datetime.now())
+
+    def __repr__(self):
+        return f"<PDFDocumentMetadata(id={self.id}, file_name={self.file_name}, uploaded_at={self.uploaded_at})>"
