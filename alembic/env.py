@@ -11,6 +11,7 @@ from backend.app.models.hostels import *
 from backend.app.models.users import *
 from backend.app.models.images import *
 from backend.app.models.receipt import *
+from backend.app.models.payments import *
 from backend.app.models.booking import *
 
 settings = get_settings()
