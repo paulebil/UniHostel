@@ -25,6 +25,9 @@ class Payment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Relationships if needed
+    booking = relationship("Booking", back_populates="payments")
+
 class StripePaymentStatus(enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
@@ -46,9 +49,11 @@ class StripePayment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Relationships if needed
+    # Foreign Key
     booking_id = Column(Integer, ForeignKey("bookings.id"), nullable=True)
-    booking = relationship("Booking", back_populates="payments")
+
+    # Relationships if needed
+    booking = relationship("Booking", back_populates="stripe_payments")
 
     def __repr__(self):
         return f"<StripePayment(id={self.id}, payment_intent_id={self.payment_intent_id}, status={self.payment_status})>"

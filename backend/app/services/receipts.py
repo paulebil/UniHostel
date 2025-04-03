@@ -12,6 +12,10 @@ from backend.app.repository.rooms import RoomsRepository
 from backend.app.repository.hostels import HostelRepository
 from backend.app.repository.payments import PaymentRepository
 
+from backend.app.core.config import get_settings
+
+settings = get_settings()
+
 
 class ReceiptService:
 
@@ -71,10 +75,10 @@ class ReceiptService:
             security_deposit = payment_info.amount
         )
 
-        bucket = "python-test-bucket"
+        bucket_name = settings.MINIO_PDF_BUCKET_NAME
 
         # Proceed to generate receipt
-        generate_receipt_background(background_tasks, receipt_context,bucket, self.receipt_repository)
+        generate_receipt_background(background_tasks, receipt_context, bucket_name, self.receipt_repository)
 
         # return json
         return JSONResponse("Receipt generated successfully.")

@@ -44,6 +44,13 @@ auth_router = APIRouter(
     dependencies=[Depends(security.oauth2_scheme), Depends(security.get_current_user)]
 )
 
+auth_router_student = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    responses={404: {"description": "Not found"}},
+    dependencies=[Depends(security.oauth2_scheme), Depends(security.get_current_user)]
+)
+
 admin_router = APIRouter(
     prefix="/admin",
     tags=["Admin"],
@@ -99,19 +106,19 @@ async def fetch_user(user=Depends(security.get_current_user), token: str = Heade
     user_obj = await user_service.fetch_user_detail(user.id)
     return user_obj
 
-@auth_router.post("/create-student", status_code=status.HTTP_201_CREATED, response_model=StudentResponse)
+@auth_router_student.post("/create-student", status_code=status.HTTP_201_CREATED, response_model=StudentResponse)
 async def create_student(data: StudentCreate, student_service: StudentService = Depends(get_student_service)):
     return await student_service.create_student(data)
 
-@auth_router.put("/update-student", status_code=status.HTTP_200_OK, response_model=StudentResponse)
+@auth_router_student.put("/update-student", status_code=status.HTTP_200_OK, response_model=StudentResponse)
 async def update_student(data: StudentUpdate, student_service: StudentService = Depends(get_student_service)):
     return await student_service.update_student(data)
 
-@auth_router.delete("/delete-student", status_code=status.HTTP_200_OK)
+@auth_router_student.delete("/delete-student", status_code=status.HTTP_200_OK)
 async def delete_student(email: str, student_service: StudentService = Depends(get_student_service)):
     return await student_service.delete_student(email)
 
-@auth_router.get("/get-student", status_code=status.HTTP_200_OK, response_model=StudentResponse)
+@auth_router_student.get("/get-student", status_code=status.HTTP_200_OK, response_model=StudentResponse)
 async def get_student(email: str, student_service: StudentService = Depends(get_student_service)):
     return await student_service.get_student_information(email)
 

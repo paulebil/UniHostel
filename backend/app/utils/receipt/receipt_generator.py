@@ -1,5 +1,4 @@
 from fastapi import BackgroundTasks
-from fastapi.responses import JSONResponse
 from datetime import datetime
 
 import jinja2

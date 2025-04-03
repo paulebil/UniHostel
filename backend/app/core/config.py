@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     MINIO_ENDPOINT: str = Field(..., env="MINIO_ENDPOINT")
     MINIO_ROOT_USER: str = Field(..., env="MINIO_ROOT_USER")
     MINIO_ROOT_PASSWORD: str = Field(..., env="MINIO_ROOT_PASSWORD")
-    MINIO_BUCKET_NAME: str = Field(..., env="MINIO_BUCKET_NAME")
+    MINIO_IMAGE_BUCKET_NAME: str = Field(..., env="MINIO_IMAGE_BUCKET_NAME")
+    MINIO_PDF_BUCKET_NAME: str = Field(..., env="MINIO_PDF_BUCKET_NAME")
 
     # Security
     ALLOWED_HOSTS: str = Field(..., env="ALLOWED_HOSTS")
