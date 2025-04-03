@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, BackgroundTasks
 
 from datetime import datetime
 
@@ -11,17 +11,32 @@ from backend.app.schemas.payments import *
 
 from backend.app.repository.booking import BookingRepository
 from backend.app.repository.rooms import RoomsRepository
+from backend.app.repository.transactions import TransactionRepository
+from backend.app.repository.hostels import HostelRepository
+from backend.app.repository.receipt import ReceiptRepository
+
+from backend.app.schemas.receipts import ReceiptContext
+
+from backend.app.utils.receipt.receipt_generator import generate_receipt_background
+
+from backend.app.core.config import get_settings
+
+settings = get_settings()
 
 
 
 class PaymentService:
     def __init__(self, payment_repository: PaymentRepository, booking_repository: BookingRepository,
-                 room_repository: RoomsRepository):
+                 room_repository: RoomsRepository, transaction_repository: TransactionRepository,
+                 hostel_repository:HostelRepository, receipt_repository:ReceiptRepository ):
         self.payment_repository = payment_repository
         self.booking_repository = booking_repository
         self.room_repository = room_repository
+        self.transaction_repository = transaction_repository
+        self.hostel_repository = hostel_repository
+        self.receipt_repository = receipt_repository
 
-    async def create_payment(self, data: PaymentCreate):
+    async def create_payment(self, data: PaymentCreate, background_tasks: BackgroundTasks):
 
         booking_info = self.booking_repository.get_booking_by_booking_id(data.booking_id)
         if not booking_info:
@@ -47,13 +62,67 @@ class PaymentService:
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
-        self.payment_repository.make_payment(payment)
+        payment_id = self.payment_repository.make_payment(payment)
 
         # check for transaction id in database and validate it
+        transaction_id = self.transaction_repository.get_transaction_by_id(data.transaction_id)
+        if not transaction_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction id not found, payment not received.")
 
         # update payment status to completed
+        payment_to_update = self.payment_repository.get_payment_by_id(payment_id)
+
+        payment_to_update.payment_status = PaymentStatus.COMPLETED.value
+
+        updated_payment_id = self.payment_repository.update_payment(payment_to_update)
+
+        updated_payment = self.payment_repository.get_payment_by_id(updated_payment_id)
 
         # create receipt with payment info
+
+        hostel_info = self.hostel_repository.get_hostel_by_id(data.booking_id)
+
+        receipt_context = ReceiptContext(
+            # Receipt information
+            receipt_number="",
+            created_at=datetime.now(),
+
+            # Booking Details
+            hostel_name=hostel_info.name,
+            room_number=room_info.room_number,
+            duration=0,
+            status=booking_info.status,
+
+            # Student information
+            student_name=booking_info.student_name,
+            student_email=booking_info.student_email,
+            student_phone=booking_info.student_phone,
+            student_course=booking_info.student_course,
+            student_study_year=booking_info.student_study_year,
+            student_university=booking_info.student_university,
+
+            # Home Residence
+            home_address=booking_info.home_address,
+            home_district=booking_info.home_district,
+            home_country=booking_info.home_country,
+
+            # Next of kin
+            next_of_kin_name=booking_info.next_of_kin_name,
+            next_of_kin_phone=booking_info.next_of_kin_phone,
+            kin_relationship=booking_info.kin_relationship,
+
+            # Pricing
+            room_price_per_semester=room_info.price_per_semester,
+
+            # Payment information
+            payment_method=updated_payment.payment_method,
+            transaction_id=updated_payment.transaction_id,
+            security_deposit=updated_payment.amount
+        )
+
+        bucket_name = settings.MINIO_PDF_BUCKET_NAME
+
+        generate_receipt_background(background_tasks, receipt_context, bucket_name, self.receipt_repository)
 
         # TODO: Send email with the receipt
 

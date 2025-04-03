@@ -13,6 +13,7 @@ class PaymentRepository:
             self.session.add(payment)
             self.session.commit()
             self.session.refresh(payment)
+            return payment.id
         except IntegrityError:
             self.session.rollback()
             raise
@@ -22,6 +23,7 @@ class PaymentRepository:
             self.session.merge(payment)
             self.session.commit()
             self.session.refresh(payment)
+            return payment.id
         except IntegrityError:
             self.session.rollback()
             raise
