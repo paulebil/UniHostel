@@ -95,8 +95,6 @@ def get_payment_service(session: Session = Depends(get_session)) -> PaymentServi
     payment_repository = PaymentRepository(session)
     booking_repository = BookingRepository(session)
     room_repository = RoomsRepository(session)
-    hostel_repository = HostelRepository(session)
-
     return PaymentService(payment_repository, booking_repository, room_repository)
 
 

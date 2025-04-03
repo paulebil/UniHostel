@@ -44,7 +44,6 @@ class PaymentService:
             payment_status=data.payment_status.value,
             transaction_id=data.transaction_id,
             payment_method=data.payment_method,
-
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
