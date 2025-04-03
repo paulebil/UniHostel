@@ -13,6 +13,7 @@ class TransactionRepository:
             self.session.add(transaction)
             self.session.commit()
             self.session.refresh(transaction)
+            return transaction.id
         except IntegrityError:
             self.session.rollback()
             raise
