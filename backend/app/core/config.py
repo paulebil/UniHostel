@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str = Field(..., env="MINIO_ROOT_PASSWORD")
     MINIO_IMAGE_BUCKET_NAME: str = Field(..., env="MINIO_IMAGE_BUCKET_NAME")
     MINIO_PDF_BUCKET_NAME: str = Field(..., env="MINIO_PDF_BUCKET_NAME")
+    MINIO_PUBLIC_ENDPOINT: str = Field(..., env="MINIO_PUBLIC_ENDPOINT")
 
     # Security
     ALLOWED_HOSTS: str = Field(..., env="ALLOWED_HOSTS")
@@ -48,8 +49,8 @@ class Settings(BaseSettings):
     # SMTP
     SMTP_HOST: str = Field(..., env="SMTP_HOST")
     SMTP_PORT: int = Field(..., env="SMTP_PORT")
-    SMTP_USERNAME: Optional[str] = Field("", env="SMTP_USERNAME")  # ✅ Default to empty string
-    SMTP_PASSWORD: Optional[SecretStr] = Field(SecretStr(""), env="SMTP_PASSWORD")  # ✅ Default to empty string
+    SMTP_USERNAME: Optional[str] = Field("", env="SMTP_USERNAME")
+    SMTP_PASSWORD: Optional[SecretStr] = Field(SecretStr(""), env="SMTP_PASSWORD")
     SMTP_FROM: EmailStr = Field(..., env="SMTP_FROM")
     SMTP_FROM_NAME: str = Field(..., env="SMTP_FROM_NAME")
     SMTP_SERVER: str = Field(..., env="SMTP_SERVER")

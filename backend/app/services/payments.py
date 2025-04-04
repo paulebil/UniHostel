@@ -130,6 +130,6 @@ class PaymentService:
 
         # TODO: Send email with the receipt
 
-        await UserAuthEmailService.send_receipt_email(receipt_context.student_email, background_tasks, bucket_name, file_name=receipt_context.receipt_number)
+        await UserAuthEmailService.send_receipt_email_with_link(receipt_context.student_email, background_tasks, bucket_name, receipt_context.receipt_number)
 
         return JSONResponse("Payment received successfully, check your email for the receipt")

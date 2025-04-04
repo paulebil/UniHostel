@@ -63,7 +63,9 @@
         <p><strong>Amount Paid:</strong> {{ amount }} {{ currency }}</p>
         <p><strong>Transaction ID:</strong> {{ transaction_id }}</p>
 
-        <p>Attached is your payment receipt for your records.</p>
+        <p>You can download your receipt using the link below:</p>
+
+        <a href="{{ receipt_url }}" class="button" target="_blank">Download Receipt</a>
 
         <footer>
             <p>Thank you for choosing {{ app_name }}!</p>
