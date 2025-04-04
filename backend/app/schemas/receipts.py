@@ -16,7 +16,7 @@ class ReceiptContext(BaseModel):
 
     # Student Information
     student_name: str
-    student_email: EmailStr
+    student_email: str
     student_phone: str
     student_university: str
     student_course: str

@@ -1,9 +1,12 @@
 from fastapi import BackgroundTasks
 from backend.app.core.config import get_settings
 from backend.app.models.users import User
-from backend.app.core.email_config import send_email
+from backend.app.core.email_config import send_email, send_email_with_attachment
 from backend.app.utils.email_context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from backend.app.core.security import Security
+
+
+from backend.app.utils.s3minio.minio_client import  download_receipt_file_from_minio
 
 security = Security()
 settings = get_settings()
@@ -84,3 +87,32 @@ class UserAuthEmailService:
             context=data,
             bg_task=background_tasks
         )
+
+    @staticmethod
+    async def send_receipt_email(user_email: str, background_tasks: BackgroundTasks, bucket: str, file_name: str):
+
+        print("Reached Sending email Part")
+        data = {
+            "app_name": settings.APP_NAME,
+            "name": user_email.split("@")[0],  # Optional: extract name
+            "message": "Thank you for your payment. Please find your receipt attached."
+        }
+
+        attachment = download_receipt_file_from_minio(bucket, file_name)
+
+        if attachment.get("error"):
+            # Handle error - you can raise an exception or log the error
+            print(attachment["message"])
+        else:
+            # Proceed with sending the email as attachment
+            await send_email_with_attachment(
+                recipients=[user_email],
+                subject="Your Payment Receipt",
+                template_name="payment/receipt.html",
+                context=data,
+                bg_task=background_tasks,
+                attachments=[attachment]
+            )
+
+
+        print("Email sent successfully")

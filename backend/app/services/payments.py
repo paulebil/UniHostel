@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status, BackgroundTasks
 
-from datetime import datetime
+import uuid
 
 from starlette.responses import JSONResponse
 
@@ -18,6 +18,8 @@ from backend.app.repository.receipt import ReceiptRepository
 from backend.app.schemas.receipts import ReceiptContext
 
 from backend.app.utils.receipt.receipt_generator import generate_receipt_background
+
+from backend.app.services.email_service import UserAuthEmailService
 
 from backend.app.core.config import get_settings
 
@@ -82,9 +84,11 @@ class PaymentService:
 
         hostel_info = self.hostel_repository.get_hostel_by_id(data.booking_id)
 
+        unique_id = str(uuid.uuid4())
+
         receipt_context = ReceiptContext(
             # Receipt information
-            receipt_number="",
+            receipt_number=unique_id,
             created_at=datetime.now(),
 
             # Booking Details
@@ -125,5 +129,7 @@ class PaymentService:
         generate_receipt_background(background_tasks, receipt_context, bucket_name, self.receipt_repository)
 
         # TODO: Send email with the receipt
+
+        await UserAuthEmailService.send_receipt_email(receipt_context.student_email, background_tasks, bucket_name, file_name=receipt_context.receipt_number)
 
         return JSONResponse("Payment received successfully, check your email for the receipt")

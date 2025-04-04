@@ -30,3 +30,14 @@ async def send_email(recipients: list, subject: str, context: dict, template_nam
     )
 
     bg_task.add_task(fm.send_message, message, template_name=template_name)
+
+async def send_email_with_attachment(recipients: list, subject: str, context: dict, template_name: str, bg_task: BackgroundTasks, attachments: list = None):
+    message = MessageSchema(
+        subject=subject,
+        recipients=recipients,
+        template_body=context,
+        subtype=MessageType.html,
+        attachments=attachments
+    )
+
+    bg_task.add_task(fm.send_message, message, template_name=template_name)

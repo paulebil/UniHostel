@@ -10,14 +10,14 @@ from backend.app.utils.s3minio.minio_client import upload_file_to_minio
 
 from backend.app.repository.receipt import ReceiptRepository
 from backend.app.models.receipt import Receipt
-from backend.app.schemas.receipts import ReceiptStatus
+from backend.app.schemas.receipts import ReceiptStatus, ReceiptContext
 
 
-def generate_receipt_pdf(context, bucket_name , receipt_repository: ReceiptRepository):
+def generate_receipt_pdf(context: ReceiptContext, bucket_name , receipt_repository: ReceiptRepository):
 
     # Generate unique file name
-    unique_id = str(uuid.uuid4())
-    pdf_filename = f"{unique_id}.pdf"
+    # unique_id = str(uuid.uuid4())
+    pdf_filename = f"{context.receipt_number}.pdf"
     pdf_path = f"pdfs/{pdf_filename}"
     content_type = "application/pdf"
 
