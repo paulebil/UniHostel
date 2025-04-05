@@ -44,8 +44,6 @@ def generate_receipt_pdf(context: ReceiptContext, bucket_name , receipt_reposito
     # Generate the PDF from the rendered HTML template
     pdfkit.from_string(output_text, pdf_path, configuration=config, css=CSS_PATH)
 
-    print("Receipt PDF generated successfully!")
-
     # Step 1: Create receipt record (Initial Status: PENDING)
     receipt_metadata = Receipt(
         status=ReceiptStatus.PENDING.value,
@@ -59,7 +57,7 @@ def generate_receipt_pdf(context: ReceiptContext, bucket_name , receipt_reposito
         # Step 2: Upload receipt to MinIO
         result = upload_file_to_minio(bucket_name, pdf_filename, pdf_path, content_type)
 
-        print(f"Bucket: {result.bucket_name}, Object: {result.object_name}, Version: {result.version_id}, ETag: {result.etag}")
+       # print(f"Bucket: {result.bucket_name}, Object: {result.object_name}, Version: {result.version_id}, ETag: {result.etag}")
 
         # Step 3: Fetch the receipt from DB before updating
         receipt_record = receipt_repository.get_receipt_metadata_by_id(receipt_id)
@@ -92,10 +90,10 @@ def generate_receipt_pdf(context: ReceiptContext, bucket_name , receipt_reposito
     # Step 4: Save updated receipt record
     receipt_repository.update_receipt_metadata(receipt_record)
 
-    print("Receipt updated successfully!")
+   # print("Receipt updated successfully!")
 
     # Step 5: Remove the generated PDF
-    print(f"Removing the pdf: {pdf_path}")
+    #print(f"Removing the pdf: {pdf_path}")
     os.remove(pdf_path)
 
 

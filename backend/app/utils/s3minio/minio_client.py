@@ -25,14 +25,7 @@ external_minio_client = Minio(
 def ensure_bucket_exists(bucket_name: str):
     if not  internal_minio_client.bucket_exists(bucket_name):
         internal_minio_client.make_bucket(bucket_name)
-        print(f"Created bucket: {bucket_name}")
-
-def get_presigned_url(bucket_name: str, object_name: str, expires: timedelta(minutes=5)):
-
-    """Generated a presigned URL valid for `expires` seconds ."""
-    url = internal_minio_client.presigned_get_object(bucket_name, object_name, expires=expires)
-
-    return url
+        #print(f"Created bucket: {bucket_name}")
 
 
 def upload_file_to_minio(bucket_name: str,object_name: str, file_name: str, content_type: str):
@@ -41,9 +34,22 @@ def upload_file_to_minio(bucket_name: str,object_name: str, file_name: str, cont
 
     result = internal_minio_client.fput_object(bucket_name, object_name, file_name, content_type)
 
-    print(f"File '{file_name}' uploaded as '{object_name}' to bucket '{bucket_name}' ")
+   # print(f"File '{file_name}' uploaded as '{object_name}' to bucket '{bucket_name}' ")
 
     return  result
+
+
+
+def generate_presigned_url(bucket_name: str, object_name: str, expiry: int = 3600) -> str:
+    try:
+        ensure_bucket_exists(bucket_name)  # Still use internal client to check
+        url = external_minio_client.presigned_get_object(bucket_name, object_name, expires=timedelta(seconds=expiry))
+        #print(f"Presigned URL (external): {url}")
+        return url
+    except Exception as e:
+        print(f"Error generating presigned URL: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate download link.")
+
 
 
 def download_file_from_minio(bucket_name: str, object_name: str, file_name: str, version_id: str):
@@ -67,14 +73,9 @@ def stream_file_to_minio(bucket_name: str, object_name: str, file_name: str):
     return result
 
 
+def get_presigned_url(bucket_name: str, object_name: str, expires: timedelta(minutes=5)):
 
-def generate_presigned_url(bucket_name: str, object_name: str, expiry: int = 3600) -> str:
-    try:
-        ensure_bucket_exists(bucket_name)  # Still use internal client to check
-        url = external_minio_client.presigned_get_object(bucket_name, object_name, expires=timedelta(seconds=expiry))
-        print(f"Presigned URL (external): {url}")
-        return url
-    except Exception as e:
-        print(f"Error generating presigned URL: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate download link.")
+    """Generated a presigned URL valid for `expires` seconds ."""
+    url = internal_minio_client.presigned_get_object(bucket_name, object_name, expires=expires)
 
+    return url
