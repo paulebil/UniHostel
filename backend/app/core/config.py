@@ -11,10 +11,6 @@ from typing import Optional
 env_path = Path(__file__).parent.parent.parent / ".env"
 load_dotenv(env_path, verbose=True)
 
-# Verify environment variables
-# print(f"Loaded .env from: {env_path}")
-# print("DB_USER:", os.getenv("DB_USER"))
-# print("EMAIL_FROM_NAME:", os.getenv("EMAIL_FROM_NAME"))
 
 class Settings(BaseSettings):
     # App

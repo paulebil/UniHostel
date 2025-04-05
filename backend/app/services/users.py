@@ -154,7 +154,12 @@ class UserService:
         raise HTTPException(status_code=400, detail="User does not exist.")
 
     async def fetch_all_users(self, current_user: User):
-        if not current_user.role == UserRole.ADMIN.value:
+
+       # convert user role to lower
+        user_role = UserRole.ADMIN.value
+        user_role_cov = user_role.lower()
+
+        if not current_user.role.value == user_role_cov:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not an admin to access this route")
         users = self.user_repository.get_all_users()
         return [
