@@ -147,7 +147,7 @@ class UserService:
             ) if user.student else None,
             hostel_owner=[HostelOwnerBase(
                 business_name=user.hostel_owner.business_name,
-            ) ]if user.hostel_owner else None,
+            ) ]if user.hostel_owner else [],
         )
         if user:
             return user

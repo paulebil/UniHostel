@@ -25,6 +25,11 @@ class BookingService:
 
     async def create_booking(self, data: BookingCreateSchema):
 
+        if not data.room_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Room id can not be null")
+        if not data.hostel_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Hostel id can not be null")
+
         room_occupancy = self.room_repository.get_room_occupancy_count(data.room_id)
 
         print(f"Room Occupancy:{room_occupancy}")

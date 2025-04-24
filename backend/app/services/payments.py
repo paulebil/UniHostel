@@ -66,9 +66,9 @@ class PaymentService:
         )
         payment_id = self.payment_repository.make_payment(payment)
 
-        # check for transaction id in database and validate it
+        # check for transaction id in database and validate it(validating that the payment was received to our backend from strip)
         transaction_id = self.transaction_repository.get_transaction_by_id(data.transaction_id)
-        if not transaction_id:
+        if  transaction_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transaction id not found, payment not received.")
 
         # update payment status to completed
@@ -82,7 +82,11 @@ class PaymentService:
 
         # create receipt with payment info
 
-        hostel_info = self.hostel_repository.get_hostel_by_id(data.booking_id)
+
+
+        hostel_info = self.hostel_repository.get_hostel_by_id(booking_info.hostel_id)
+        if not hostel_info:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
 
         unique_id = str(uuid.uuid4())
 

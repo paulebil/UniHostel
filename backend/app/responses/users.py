@@ -21,5 +21,5 @@ class AllUserResponse(UserResponse):
     is_active: bool
     verified_at: Optional[datetime]
     updated_at: datetime
-    student: Optional[StudentBase]
-    hostel_owner: list[Optional[HostelOwnerBase]]
+    student: Optional[StudentBase] = None
+    hostel_owner: list[Optional[HostelOwnerBase]] = None

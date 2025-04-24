@@ -48,7 +48,7 @@ def get_booking_service(session: Session = Depends(get_session)) -> BookingServi
     hostel_repository = HostelRepository(session)
     return BookingService(booking_repository, room_repository, hostel_owner_repository, hostel_repository)
 
-@booking_user_router.post("/create", status_code=status.HTTP_201_CREATED, response_model=BookingResponseSchema)
+@booking_user_router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_booking(data: BookingCreateSchema, booking_service: BookingService = Depends(get_booking_service)):
     return await booking_service.create_booking(data)
 

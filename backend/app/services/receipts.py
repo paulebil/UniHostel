@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi.responses import JSONResponse
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException, status
 
 from backend.app.utils.receipt.receipt_generator import generate_receipt_background
 from backend.app.schemas.receipts import ReceiptContext
@@ -30,12 +30,20 @@ class ReceiptService:
 
     async def create_receipt(self, booking_id: int, background_tasks: BackgroundTasks):
         booking_data = self.booking_repository.get_booking_by_booking_id(booking_id)
+        if not booking_data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking with this id not found.")
 
         room_info = self.room_repository.get_room_by_id(booking_data.room_id)
+        if not room_info:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found.")
 
         hostel_info = self.hostel_repository.get_hostel_by_id(booking_data.hostel_id)
+        if not hostel_info:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
 
         payment_info = self.payment_repository.get_payment_by_booking_id(booking_id)
+        if not payment_info:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found for this booking")
 
         receipt_context = ReceiptContext(
             # Receipt information

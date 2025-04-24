@@ -2,7 +2,6 @@ from pydantic import BaseModel,constr, conint
 import enum
 
 class UserRole(str, enum.Enum):
-    STUDENT = "STUDENT"
     HOSTEL_OWNER = "HOSTEL_OWNER"
     ADMIN = "ADMIN"
 
