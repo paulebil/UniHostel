@@ -1,6 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from datetime import datetime
 from typing import Optional, List
+
+class Images(BaseModel):
+    url: HttpUrl
+    alt_text: Optional[str] = None
 
 
 class RoomResponse(BaseModel):
@@ -13,7 +17,7 @@ class RoomResponse(BaseModel):
     capacity: int
     bathroom: bool
     balcony: bool
-    image_url: Optional[str] = None
+    image_url: List[Images]
     created_at: datetime
     updated_at: datetime
 

@@ -57,6 +57,8 @@ async def get_single_room_detail(hostel_id: int, room_number: str, current_user 
                                  room_service: RoomService = Depends(get_rooms_service)):
     return await room_service.get_single_room_by_hostel_id_custodian(room_number, hostel_id, current_user)
 
+################################# student enpoints
+
 @room_user_router.get("/get-all-rooms", status_code=status.HTTP_200_OK, response_model=AllRoomsResponse)
 async def get_all_rooms_in_a_hostel(hostel_id: int, room_service: RoomService = Depends(get_rooms_service)):
     return await room_service.get_all_rooms_by_hostel_id(hostel_id)

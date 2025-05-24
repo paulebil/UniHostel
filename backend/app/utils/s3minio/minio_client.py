@@ -3,7 +3,7 @@ import io
 
 from datetime import timedelta
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 from backend.app.core.config import get_settings
 

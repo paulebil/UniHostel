@@ -1,6 +1,11 @@
-from pydantic import BaseModel, constr, conint
+from pydantic import BaseModel, constr, conint, HttpUrl
 from typing import Optional, List
 from datetime import datetime
+
+class Images(BaseModel):
+    url: HttpUrl
+    alt_text: Optional[str] = None
+
 
 
 class HostelResponse(BaseModel):
@@ -9,7 +14,7 @@ class HostelResponse(BaseModel):
     """
     id: int
     name: constr(min_length=1, max_length=255)
-    image_url: Optional[constr(max_length=255)] = None
+    image_url: List[Images]
     description: constr(min_length=1)
     location: constr(min_length=1, max_length=255)
     owner_id: conint(ge=1)
@@ -31,6 +36,5 @@ class HostelSearchResponse(BaseModel):
     Pydantic model for returning hostel search results
     """
     results: List[HostelResponse]
-
 
 
