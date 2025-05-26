@@ -3,7 +3,7 @@ import io
 
 from datetime import timedelta
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
 from backend.app.core.config import get_settings
 
@@ -38,6 +38,31 @@ def upload_file_to_minio(bucket_name: str,object_name: str, file_name: str, cont
 
     return  result
 
+
+# ✅ Now async and without unused result
+async def upload_image_file_to_minio(bucket_name: str, object_name: str, file: UploadFile):
+    ensure_bucket_exists(bucket_name)
+
+    content = await file.read()
+    file.file.seek(0)
+
+    internal_minio_client.put_object(
+        bucket_name,
+        object_name,
+        io.BytesIO(content),
+        length=len(content),
+        content_type=file.content_type
+    )
+
+    stat = internal_minio_client.stat_object(bucket_name, object_name)
+
+    return {
+        "bucket_name": bucket_name,
+        "object_name": object_name,
+        "etag": stat.etag,
+        "version_id": getattr(stat, "version_id", None),
+        "file_name": file.filename
+    }
 
 
 def generate_presigned_url(bucket_name: str, object_name: str, expiry: int = 3600) -> str:

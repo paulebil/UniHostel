@@ -122,23 +122,23 @@ async def delete_student(email: str, student_service: StudentService = Depends(g
 async def get_student(email: str, student_service: StudentService = Depends(get_student_service)):
     return await student_service.get_student_information(email)
 
-@auth_router.post("/create-owner", status_code=status.HTTP_201_CREATED, response_model=HostelOwnerResponse)
-async def create_owner(data: HostelOwnerCreate,
-                       hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
-    return await hostel_owner_service.create_hostel_owner(data)
-
-@auth_router.put("/update-owner", status_code=status.HTTP_200_OK, response_model=HostelOwnerResponse)
-async def update_owner(data: HostelOwnerUpdate,
-                       hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
-    return await hostel_owner_service.update_hostel_owner(data)
-
-@auth_router.delete("/delete-owner", status_code=status.HTTP_200_OK)
-async def delete_owner(email: str, hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
-    return await hostel_owner_service.delete_hostel_owner(email)
-
-@auth_router.get("/get-owner", status_code=status.HTTP_200_OK, response_model=HostelOwnerResponse)
-async def get_owner(email: str, hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
-    return await hostel_owner_service.get_hostel_owner_information(email)
+# @auth_router.post("/create-owner", status_code=status.HTTP_201_CREATED, response_model=HostelOwnerResponse)
+# async def create_owner(data: HostelOwnerCreate,
+#                        hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
+#     return await hostel_owner_service.create_hostel_owner(data)
+#
+# @auth_router.put("/update-owner", status_code=status.HTTP_200_OK, response_model=HostelOwnerResponse)
+# async def update_owner(data: HostelOwnerUpdate,
+#                        hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
+#     return await hostel_owner_service.update_hostel_owner(data)
+#
+# @auth_router.delete("/delete-owner", status_code=status.HTTP_200_OK)
+# async def delete_owner(email: str, hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
+#     return await hostel_owner_service.delete_hostel_owner(email)
+#
+# @auth_router.get("/get-owner", status_code=status.HTTP_200_OK, response_model=HostelOwnerResponse)
+# async def get_owner(email: str, hostel_owner_service: HostelOwnerService = Depends(get_hostel_owner_service)):
+#     return await hostel_owner_service.get_hostel_owner_information(email)
 
 @admin_router.get("/users", response_model=list[AllUserResponse])
 async def get_all_users(user_service: UserService = Depends(get_user_service), current_user = Depends(security.get_current_user)):

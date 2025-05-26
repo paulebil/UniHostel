@@ -3,6 +3,7 @@ from backend.app.routes.users import user_router, auth_router, guest_router, adm
 from backend.app.routes.hostels import hostel_router, hostel_user_router
 from backend.app.routes.rooms import room_router, room_user_router
 from backend.app.routes.booking import booking_user_router, booking_router
+from backend.app.routes.image_upload import image_router
 
 
 def create_application():
@@ -24,6 +25,8 @@ def create_application():
     # Booking
     application.include_router(booking_user_router)
     application.include_router(booking_router)
+
+    application.include_router(image_router)
 
     return application
 

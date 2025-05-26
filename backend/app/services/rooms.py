@@ -9,15 +9,21 @@ from backend.app.responses.rooms import *
 from backend.app.repository.hostels import HostelRepository
 from backend.app.repository.custodian import HostelOwnerRepository
 
+from backend.app.models.images import ImageMetaData
+from backend.app.repository.images import ImageMetaDataRepository
+from backend.app.responses.images import Images
+from backend.app.utils.s3minio.minio_client import  generate_presigned_url
+
 from backend.app.models.users import User
 
 
 class RoomService:
     def __init__(self, rooms_repository: RoomsRepository, hostel_repository: HostelRepository,
-                 owner_repo: HostelOwnerRepository):
+                 owner_repo: HostelOwnerRepository, image_repo: ImageMetaDataRepository):
         self.hostel_owner_repository = owner_repo
         self.rooms_repository = rooms_repository
         self.hostel_repository = hostel_repository
+        self.image_repository = image_repo
 
     async def create_room(self, data: RoomCreateSchema, current_user: User) -> RoomResponse:
         # Authorization check
@@ -256,6 +262,18 @@ class RoomService:
         if not room:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
+        # Get all this room image metadata from images table
+        images = self.image_repository.get_image_metadata_by_room_id(room.id)
+        if not images:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room has no images")
+
+        image_urls = []
+
+        # Get presigned_url for all the images
+        for image in images:
+            url = generate_presigned_url(image.bucket_name, image.object_name)
+            image_urls.append({"url": url})
+
         return RoomResponse(
             id=room.id,
             hostel_id=room.hostel_id,
@@ -266,7 +284,7 @@ class RoomService:
             capacity=room.capacity,
             bathroom=room.bathroom,
             balcony=room.balcony,
-            image_url=room.image_url,
+            image_url=image_urls,
             created_at=room.created_at,
             updated_at=room.updated_at
         )

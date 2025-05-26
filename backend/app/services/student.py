@@ -50,7 +50,6 @@ class StudentService:
 
         return student_response
 
-        return student_response
 
     async def update_student(self, data: StudentUpdate) -> StudentResponse:
         # Retrieve the user

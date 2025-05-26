@@ -6,6 +6,7 @@ from backend.app.services.rooms import RoomService
 from backend.app.repository.rooms import RoomsRepository
 from backend.app.schemas.rooms import *
 from backend.app.responses.rooms import *
+from backend.app.repository.images import ImageMetaDataRepository
 
 from backend.app.core.security import Security
 from backend.app.database.database import get_session
@@ -31,7 +32,8 @@ def get_rooms_service(session: Session = Depends(get_session)) -> RoomService:
     room_repository = RoomsRepository(session)
     hostel_repository = HostelRepository(session)
     hostel_owner_repository = HostelOwnerRepository(session)
-    return RoomService(room_repository, hostel_repository, hostel_owner_repository)
+    image_metadata_repository = ImageMetaDataRepository(session)
+    return RoomService(room_repository, hostel_repository, hostel_owner_repository, image_metadata_repository)
 
 @room_router.post("/create", status_code=status.HTTP_201_CREATED, response_model=RoomResponse)
 async def create_room(data: RoomCreateSchema, room_service: RoomService = Depends(get_rooms_service),
@@ -57,7 +59,7 @@ async def get_single_room_detail(hostel_id: int, room_number: str, current_user 
                                  room_service: RoomService = Depends(get_rooms_service)):
     return await room_service.get_single_room_by_hostel_id_custodian(room_number, hostel_id, current_user)
 
-################################# student enpoints
+################################# student endpoints
 
 @room_user_router.get("/get-all-rooms", status_code=status.HTTP_200_OK, response_model=AllRoomsResponse)
 async def get_all_rooms_in_a_hostel(hostel_id: int, room_service: RoomService = Depends(get_rooms_service)):
