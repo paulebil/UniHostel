@@ -1,4 +1,5 @@
-from fastapi import HTTPException, status
+from docutils.nodes import description
+from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 
 from backend.app.models.hostels import Room
@@ -7,37 +8,33 @@ from backend.app.schemas.rooms import *
 from backend.app.responses.rooms import *
 
 from backend.app.repository.hostels import HostelRepository
-from backend.app.repository.custodian import HostelOwnerRepository
 
 from backend.app.models.images import ImageMetaData
 from backend.app.repository.images import ImageMetaDataRepository
 from backend.app.responses.images import Images
-from backend.app.utils.s3minio.minio_client import  generate_presigned_url
+from backend.app.utils.s3minio.minio_client import  generate_presigned_url, upload_image_file_to_minio
 
 from backend.app.models.users import User
+from backend.app.core.config import get_settings
+from uuid import uuid4
+
+settings = get_settings()
 
 
 class RoomService:
     def __init__(self, rooms_repository: RoomsRepository, hostel_repository: HostelRepository,
-                 owner_repo: HostelOwnerRepository, image_repo: ImageMetaDataRepository):
-        self.hostel_owner_repository = owner_repo
+                  image_repo: ImageMetaDataRepository):
         self.rooms_repository = rooms_repository
         self.hostel_repository = hostel_repository
         self.image_repository = image_repo
 
-    async def create_room(self, data: RoomCreateSchema, current_user: User) -> RoomResponse:
+    async def create_room(self, images: List[UploadFile], data: RoomCreateSchema, current_user: User):
         # Authorization check
         if not current_user.hostel_owner:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
-        # Fetch hostel owner
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="User is not registered as a hostel owner")
-
         # Fetch owned hostels
-        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
         if not owned_hostels:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User does not own any hostel to create a room")
@@ -54,39 +51,56 @@ class RoomService:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="Room with this number already exists.")
 
+        draft_id = uuid4().hex
+
         # Create room instance
         room = Room(
             hostel_id=data.hostel_id,
             room_number=data.room_number,
             price_per_semester=data.price_per_semester,
             room_type=data.room_type,
-            availability=data.availability,
             capacity=data.capacity,
-            bathroom=data.bathroom,
-            balcony=data.balcony,
-            image_url=data.image_url,
+            description=data.description,
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
 
         # Save room to database
-        self.rooms_repository.create_room(room)
+        room =  self.rooms_repository.create_room(room)
 
-        # Return response
-        return RoomResponse(
-            id=room.id,
-            hostel_id=room.hostel_id,
-            room_number=room.room_number,
-            price_per_semester=room.price_per_semester,
-            room_type=room.room_type.value,  # Convert Enum to string
-            availability=room.availability,
-            capacity=room.capacity,
-            bathroom=room.bathroom,
-            balcony=room.balcony,
-            image_url=room.image_url,
-            created_at=room.created_at,
-            updated_at=room.updated_at
-        )
+
+        bucket_name = settings.MINIO_IMAGE_BUCKET_NAME
+        uploaded = []
+        if not images:
+            raise HTTPException(status_code=400, detail="No files uploaded.")
+
+        for file in images:
+            object_name = f"{room.id}/{uuid4().hex}_{file.filename}"
+
+            meta = await upload_image_file_to_minio(bucket_name, object_name, file)
+
+            image = ImageMetaData(
+                file_name=meta["file_name"],
+                bucket_name=meta["bucket_name"],
+                object_name=meta["object_name"],
+                etag=meta["etag"],
+                version_id=meta.get("version_id"),
+                draft_id=draft_id, # ← stored for later association
+                room_id=room.id
+            )
+
+            self.image_repository.create_image_metadata(image)
+
+            uploaded.append({
+                "id": image.id,
+                "file_name": image.file_name
+            })
+
+        image_count = len(uploaded)
+
+        return JSONResponse(content= {"message": "Upload successful","files": image_count},
+                            status_code=status.HTTP_200_OK)
+
 
     async def update_room(self, data: RoomUpdateSchema, current_user: User) -> RoomResponse:
         # Authorization check

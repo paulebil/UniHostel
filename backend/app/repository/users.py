@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
-from backend.app.models.users import User, UserToken, Student, HostelOwner
+from backend.app.models.users import User, UserToken
 from sqlalchemy.exc import IntegrityError
 
 

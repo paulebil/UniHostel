@@ -13,6 +13,7 @@ class RoomsRepository:
             self.session.add(room)
             self.session.commit()
             self.session.refresh(room)
+            return room
         except IntegrityError:
             self.session.rollback()
             raise

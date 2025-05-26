@@ -13,11 +13,8 @@ class RoomCreateSchema(BaseModel):
     room_number: str
     price_per_semester: float
     room_type: RoomType
-    availability: bool = True
     capacity: int = 2
-    bathroom: bool = False
-    balcony: bool = False
-    image_url: Optional[str] = None
+    description: str
 
 
 class RoomUpdateSchema(BaseModel):
@@ -33,9 +30,5 @@ class RoomUpdateSchema(BaseModel):
 
 
 class DeleteRoomSchema(BaseModel):
-    hostel_id: Optional[int] = None
-    room_number: Optional[str] = None
-
-class RoomRetrieveDetailSchema(BaseModel):
     hostel_id: Optional[int] = None
     room_number: Optional[str] = None

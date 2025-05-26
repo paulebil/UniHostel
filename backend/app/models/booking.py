@@ -17,22 +17,11 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
     # Student Information
-    student_name = Column(String(100), nullable=False)
-    student_email = Column(String(100), nullable=False, index=True)
-    student_phone = Column(String(20), nullable=False)
-    student_university = Column(String(100), nullable=False)
-    student_course = Column(String(100), nullable=False)
-    student_study_year = Column(String(50), nullable=False)
-
-    # Home residence information
-    home_address = Column(String(100), nullable=False)
-    home_district = Column(String(100), nullable=False)
-    home_country = Column(String(50), nullable=False)
-
-    # Next of Kin Information
-    next_of_kin_name = Column(String(100), nullable=False)
-    next_of_kin_phone = Column(String(20), nullable=False)
-    kin_relationship = Column(String(50), nullable=False)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
+    email_address = Column(String(100), nullable=False, index=True)
+    phone_number = Column(String(20), nullable=False)
+    university = Column(String(100), nullable=False)
 
     # Foreign Keys (Either hostel_id or room_id will be set)
     hostel_id = Column(Integer, ForeignKey("hostels.id"), nullable=True)

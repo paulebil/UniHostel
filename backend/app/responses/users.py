@@ -1,8 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
-from backend.app.responses.students import StudentBase
-from backend.app.responses.custodian import HostelOwnerBase
 
 class UserResponse(BaseModel):
     id: int
@@ -21,5 +19,3 @@ class AllUserResponse(UserResponse):
     is_active: bool
     verified_at: Optional[datetime]
     updated_at: datetime
-    student: Optional[StudentBase] = None
-    hostel_owner: list[Optional[HostelOwnerBase]] = None

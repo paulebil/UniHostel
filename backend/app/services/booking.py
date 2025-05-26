@@ -10,17 +10,15 @@ from backend.app.responses.booking import *
 from backend.app.schemas.booking import *
 
 from backend.app.repository.rooms import RoomsRepository
-from backend.app.repository.custodian import HostelOwnerRepository
 from backend.app.repository.hostels import HostelRepository
 from backend.app.models.users import User
 
 
 class BookingService:
     def __init__(self, booking_repository: BookingRepository, room_repository: RoomsRepository,
-                 hostel_owner_repository: HostelOwnerRepository, hostel_repository: HostelRepository):
+                  hostel_repository: HostelRepository):
         self.booking_repository = booking_repository
         self.room_repository = room_repository
-        self.hostel_owner_repository = hostel_owner_repository
         self.hostel_repository = hostel_repository
 
     async def create_booking(self, data: BookingCreateSchema):

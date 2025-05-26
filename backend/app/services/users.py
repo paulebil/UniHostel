@@ -9,8 +9,6 @@ from backend.app.models.users import User, UserToken
 from backend.app.core.config import get_settings
 from backend.app.repository.users import UserRepository
 from backend.app.responses.users import UserResponse, AllUserResponse
-from backend.app.responses.students import StudentBase
-from backend.app.responses.custodian import HostelOwnerBase
 from backend.app.schemas.users import *
 from backend.app.services.email_service import UserAuthEmailService
 from backend.app.services.password_reset import PasswordResetService
@@ -141,13 +139,6 @@ class UserService:
             is_active=user.is_active,
             verified_at=user.verified_at,
             updated_at=user.updated_at,
-            student=StudentBase(
-                student_number=user.student.student_number,
-                university_name=user.student.university_name
-            ) if user.student else None,
-            hostel_owner=[HostelOwnerBase(
-                business_name=user.hostel_owner.business_name,
-            ) ]if user.hostel_owner else [],
         )
         if user:
             return user
@@ -172,13 +163,5 @@ class UserService:
                 is_active=user.is_active,
                 verified_at=user.verified_at,
                 updated_at=user.updated_at,
-                student=StudentBase(
-                    student_number=user.student.student_number,
-                    university_name=user.student.university_name
-                ) if user.student else None,
-                hostel_owner=[
-                    HostelOwnerBase(business_name=owner.business_name)
-                    for owner in user.hostel_owner
-                ] if user.hostel_owner else []
             ) for user in users
         ]

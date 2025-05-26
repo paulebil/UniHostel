@@ -23,9 +23,7 @@ class User(Base):
 
     tokens = relationship("UserToken", back_populates="user", cascade="all, delete")
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete")
-    student = relationship("Student", back_populates="user", cascade="all, delete", uselist=False)
-    hostel_owner = relationship("HostelOwner", back_populates="user", cascade="all, delete")
-    hostels = relationship("Hostel", back_populates="owner", cascade="all, delete")
+    hostels = relationship("Hostel", back_populates="user", cascade="all, delete")
 
     def get_context_string(self, context: str):
         return f"{context}{self.password[-6:]}{self.updated_at.strftime('%m%d%Y%H%M%S')}".strip()
@@ -56,22 +54,3 @@ class PasswordResetToken(Base):
 
     def __repr__(self):
         return f"<PasswordResetToken(user_id={self.user_id}, token_hash={self.token_hash})>"
-
-class Student(Base):
-    __tablename__ = "students"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    university_name = Column(String(150), nullable=False)
-    student_number = Column(String(100), unique=True, nullable=False)
-
-    user = relationship("User", back_populates="student")
-
-
-class HostelOwner(Base):
-    __tablename__ = "hostel_owners"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    business_name = Column(String(150), nullable=False)
-
-    user = relationship("User", back_populates="hostel_owner")

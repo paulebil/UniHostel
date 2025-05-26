@@ -7,19 +7,14 @@ from backend.app.repository.hostels import HostelRepository
 from backend.app.schemas.hostels import *
 from backend.app.responses.hostels import *
 
-from backend.app.repository.custodian import HostelOwnerRepository
-
-
 
 class HostelService:
-    def __init__(self, hostel_repository: HostelRepository, hostel_owner_repository: HostelOwnerRepository ):
+    def __init__(self, hostel_repository: HostelRepository ):
         self.hostel_repository = hostel_repository
-        self.hostel_owner_repository = hostel_owner_repository
 
     async def create_hostel(self, data: HostelCreateSchema, current_user: User):
         # check if user is a hostel owner
-        if not current_user.hostel_owner:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a hostel.")
+
         # check if Hostel with this name exists
         hostel_exists = self.hostel_repository.get_hostel_by_name(data.name)
         if hostel_exists:
@@ -30,8 +25,8 @@ class HostelService:
             image_url=data.image_url,
             description=data.description,
             location=data.location,
-            owner_id=current_user.id,
             average_price=data.average_price,
+            user_id=current_user.id,
             available_rooms=data.available_rooms,
             rules_and_regulations=data.rules_and_regulations,
             amenities=data.amenities,
@@ -40,35 +35,31 @@ class HostelService:
         )
         self.hostel_repository.create_hostel(hostel)
 
-        # Return hostel response
-        hostel_response = HostelResponse(
-            id=hostel.id,
-            name=hostel.name,
-            image_url=hostel.image_url,
-            description=hostel.description,
-            location=hostel.location,
-            owner_id=hostel.owner_id,
-            average_price=hostel.average_price,
-            available_rooms=hostel.available_rooms,
-            amenities=hostel.amenities,
-            rules_and_regulations=hostel.get_rules(),
-            created_at=hostel.created_at,
-            updated_at=hostel.updated_at
-        )
-        return hostel_response
+        # # Return hostel response
+        # hostel_response = HostelResponse(
+        #     id=hostel.id,
+        #     name=hostel.name,
+        #     image_url=hostel.image_url,
+        #     description=hostel.description,
+        #     location=hostel.location,
+        #     owner_id=hostel.owner_id,
+        #     average_price=hostel.average_price,
+        #     available_rooms=hostel.available_rooms,
+        #     amenities=hostel.amenities,
+        #     rules_and_regulations=hostel.get_rules(),
+        #     created_at=hostel.created_at,
+        #     updated_at=hostel.updated_at
+        # )
+        return {"message": "Hostel created successfully."}
 
     async def update_hostel(self, data: HostelUpdateSchema, current_user: User):
         # check if user is a hostel owner
         if not current_user.hostel_owner:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User is not authorized to update a hostel.")
-        # Retrieve the owner using user id
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel owner not found.")
 
         # get the hostel by owner id
-        hostel = self.hostel_repository.get_hostel_by_owner_id(owner.id)
+        hostel = self.hostel_repository.get_hostel_by_owner_id(current_user.id)
 
         if not hostel:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
@@ -88,6 +79,7 @@ class HostelService:
             hostel.description = data.description
         if data.image_url:
             hostel.image_url = data.image_url
+
         self.hostel_repository.update_hostel(hostel)
 
         return HostelResponse(
@@ -96,7 +88,6 @@ class HostelService:
             image_url=hostel.image_url,
             description=hostel.description,
             location=hostel.location,
-            owner_id=hostel.owner_id,
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
@@ -110,13 +101,8 @@ class HostelService:
         if not current_user.hostel_owner:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User is not authorized to delete a hostel.")
-        # Retrieve the owner using user id
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel owner not found.")
-
         # get the hostels by owner id
-        hostel = self.hostel_repository.get_hostel_by_owner_id(owner.id)
+        hostel = self.hostel_repository.get_hostel_by_owner_id(current_user.id)
         if not hostel:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
 
@@ -135,13 +121,9 @@ class HostelService:
         if not current_user.hostel_owner:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User is not authorized to delete a hostel.")
-        # Retrieve the owner using user id
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel owner not found.")
 
         # get the hostels by owner id
-        hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
         if not hostels:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
 
@@ -221,18 +203,13 @@ class HostelService:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User is not authorized to view hostel details.")
 
-        # Retrieve the hostel owner using user id
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel owner not found.")
-
         # Fetch the hostel details by hostel_id
         hostel = self.hostel_repository.get_hostel_by_id(hostel_id)
         if not hostel:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
 
         # Ensure the user is the owner of the hostel
-        if hostel.owner_id != owner.id:
+        if hostel.user_id != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this hostel.")
 
         # Return the hostel details in the response

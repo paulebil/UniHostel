@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Form, UploadFile,File
 
-from backend.app.repository.hostels import HostelRepository
-from backend.app.repository.custodian import HostelOwnerRepository
 from backend.app.services.rooms import RoomService
 from backend.app.repository.rooms import RoomsRepository
 from backend.app.schemas.rooms import *
 from backend.app.responses.rooms import *
 from backend.app.repository.images import ImageMetaDataRepository
+from backend.app.repository.hostels import HostelRepository
 
 from backend.app.core.security import Security
 from backend.app.database.database import get_session
@@ -31,14 +30,25 @@ room_user_router = APIRouter(
 def get_rooms_service(session: Session = Depends(get_session)) -> RoomService:
     room_repository = RoomsRepository(session)
     hostel_repository = HostelRepository(session)
-    hostel_owner_repository = HostelOwnerRepository(session)
     image_metadata_repository = ImageMetaDataRepository(session)
-    return RoomService(room_repository, hostel_repository, hostel_owner_repository, image_metadata_repository)
+    return RoomService(room_repository,hostel_repository,image_metadata_repository)
 
 @room_router.post("/create", status_code=status.HTTP_201_CREATED, response_model=RoomResponse)
-async def create_room(data: RoomCreateSchema, room_service: RoomService = Depends(get_rooms_service),
+async def create_room(hostel_id: int = Form(), room_number: str = Form(...),room_type: RoomType = Form(),
+                      occupancy: int = Form(), description: str = Form(...),price_per_semester: int = Form(),
+                      images: List[UploadFile] = File(...),
+                      room_service: RoomService = Depends(get_rooms_service),
                       current_user = Depends(security.get_current_user)):
-    return await room_service.create_room(data, current_user)
+    data = RoomCreateSchema(
+        hostel_id=hostel_id,
+        room_number=room_number,
+        room_type=room_type,
+        capacity=occupancy,
+        price_per_semester=price_per_semester,
+        description=description
+    )
+
+    return await room_service.create_room(images, data, current_user)
 
 @room_router.put("/update", status_code=status.HTTP_200_OK, response_model=RoomResponse)
 async def update_room(data: RoomUpdateSchema, room_service: RoomService = Depends(get_rooms_service),

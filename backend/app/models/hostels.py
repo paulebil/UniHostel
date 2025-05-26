@@ -4,7 +4,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy import event
 
 import enum
 from backend.app.database.database import Base
@@ -20,7 +19,7 @@ class Hostel(Base):
     image_url = Column(String(255), nullable=True)
     description = Column(Text, nullable=False)
     location = Column(String(255), nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # Links to User
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # Links to User
     average_price = Column(Integer, nullable=False)
     available_rooms = Column(Integer, nullable=False, default=0)
     rules_and_regulations = Column(Text, nullable=True)
@@ -36,7 +35,7 @@ class Hostel(Base):
     )
 
     # Relationships
-    owner = relationship("User", back_populates="hostels")
+    user = relationship("User", back_populates="hostels")
     rooms = relationship("Room", back_populates="hostel", cascade="all, delete-orphan")
     bookings = relationship("Booking", back_populates="hostel", cascade="all, delete-orphan")
 
@@ -52,15 +51,6 @@ class Hostel(Base):
             return [rule.strip().capitalize() for rule in self.rules_and_regulations.split(',')]
         return []
 
-
-# # Register the DDL trigger via event listener
-# @event.listens_for(Hostel.__table__, 'after_create')
-# def create_trigger(target, connection, **kwargs):
-#     connection.execute("""
-#         CREATE TRIGGER tsvector_update BEFORE INSERT OR UPDATE
-#         ON hostels FOR EACH ROW EXECUTE FUNCTION
-#         tsvector_update_trigger(search_vector, 'pg_catalog.english', name, location, description, amenities);
-#     """)
 
 class RoomType(enum.Enum):
     SINGLE = "single"
@@ -82,10 +72,7 @@ class Room(Base):
     availability = Column(Boolean, default=True)
     capacity = Column(Integer, nullable=False, default=2)
     occupancy = Column(Integer, nullable=True, default=0)
-    bathroom = Column(Boolean, nullable=False,default=False)
-    balcony = Column(Boolean, nullable=False, default=False)
-    image_url = Column(String(255), nullable=True)
-    booked_status = Column(Boolean, nullable=True, default=True)
+    description = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 
