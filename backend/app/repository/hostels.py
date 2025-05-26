@@ -28,6 +28,7 @@ class HostelRepository:
             self.session.commit()
             self.session.refresh(hostel)
             logger.info(f"Hostel created successfully: {hostel.name}")
+            return hostel
         except IntegrityError as e:
             self.session.rollback()
             logger.error(f"Failed to create hostel: {str(e)}")
@@ -103,7 +104,7 @@ class HostelRepository:
         """
         if not isinstance(owner_id, int):
             raise ValueError("Owner ID must be an integer")
-        return self.session.query(Hostel).filter(Hostel.owner_id == owner_id).first()
+        return self.session.query(Hostel).filter(Hostel.user_id == owner_id).first()
 
     def get_all_hostels_by_one_owner(self, owner_id: int, page: int = 1, per_page: int = 10):
         """
@@ -119,7 +120,7 @@ class HostelRepository:
         """
         if not isinstance(owner_id, int):
             raise ValueError("Owner ID must be an integer")
-        return self.session.query(Hostel).filter(Hostel.owner_id == owner_id).offset((page - 1) * per_page).limit(per_page).all()
+        return self.session.query(Hostel).filter(Hostel.user_id == owner_id).offset((page - 1) * per_page).limit(per_page).all()
 
     def get_hostel_by_id(self, hostel_id: int) -> Hostel:
         """

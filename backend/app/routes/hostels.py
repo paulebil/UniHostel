@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Form, File, UploadFile
 
 from backend.app.schemas.hostels import *
 from backend.app.responses.hostels import *
 from backend.app.services.hostels import HostelService
 from backend.app.repository.hostels import HostelRepository
+from backend.app.repository.images import ImageMetaDataRepository
 from backend.app.database.database import get_session
 from backend.app.core.security import Security
 
@@ -28,12 +29,27 @@ hostel_user_router = APIRouter(
 
 def get_hostel_service(session: Session = Depends(get_session)) -> HostelService:
     hostel_repository = HostelRepository(session)
-    return HostelService(hostel_repository)
+    image_repository = ImageMetaDataRepository(session)
+    return HostelService(hostel_repository, image_repository)
 
 @hostel_router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_hostel(data: HostelCreateSchema, hostel_service: HostelService = Depends(get_hostel_service),
-                        current_user = Depends(security.get_current_user)):
-    return await hostel_service.create_hostel(data, current_user)
+async def create_hostel(name: str = Form(), location: str = Form(...),average_price:int = Form(),
+                      available_rooms: int = Form(), description: str = Form(...), rules_and_regulations: str = Form(),
+                      amenities: str = Form(),images: List[UploadFile] = File(...),
+                      hostel_service: HostelService = Depends(get_hostel_service),
+                      current_user = Depends(security.get_current_user)):
+
+    data = HostelCreateSchema(
+        name=name,
+        description=description,
+        location=location,
+        average_price=average_price,
+        available_rooms=available_rooms,
+        amenities=amenities,
+        rules_and_regulations=rules_and_regulations
+    )
+
+    return await hostel_service.create_hostel(images, data, current_user)
 
 @hostel_router.put("/update", status_code=status.HTTP_200_OK , response_model=HostelResponse)
 async def update_hostel(data: HostelUpdateSchema, hostel_service: HostelService = Depends(get_hostel_service),

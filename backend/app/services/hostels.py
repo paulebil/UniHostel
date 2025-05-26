@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 
 from backend.app.models.hostels import Hostel
@@ -7,12 +7,21 @@ from backend.app.repository.hostels import HostelRepository
 from backend.app.schemas.hostels import *
 from backend.app.responses.hostels import *
 
+from backend.app.core.config import get_settings
+from uuid import uuid4
+from backend.app.utils.s3minio.minio_client import upload_image_file_to_minio
+from backend.app.models.images import ImageMetaData
+from backend.app.repository.images import ImageMetaDataRepository
+
+settings = get_settings()
+
 
 class HostelService:
-    def __init__(self, hostel_repository: HostelRepository ):
+    def __init__(self, hostel_repository: HostelRepository, image_repository: ImageMetaDataRepository):
         self.hostel_repository = hostel_repository
+        self.image_repository = image_repository
 
-    async def create_hostel(self, data: HostelCreateSchema, current_user: User):
+    async def create_hostel(self, images: List[UploadFile], data: HostelCreateSchema, current_user: User):
         # check if user is a hostel owner
 
         # check if Hostel with this name exists
@@ -22,7 +31,6 @@ class HostelService:
         # create hostel
         hostel = Hostel(
             name=data.name,
-            image_url=data.image_url,
             description=data.description,
             location=data.location,
             average_price=data.average_price,
@@ -33,24 +41,39 @@ class HostelService:
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
-        self.hostel_repository.create_hostel(hostel)
+        hostel = self.hostel_repository.create_hostel(hostel)
 
-        # # Return hostel response
-        # hostel_response = HostelResponse(
-        #     id=hostel.id,
-        #     name=hostel.name,
-        #     image_url=hostel.image_url,
-        #     description=hostel.description,
-        #     location=hostel.location,
-        #     owner_id=hostel.owner_id,
-        #     average_price=hostel.average_price,
-        #     available_rooms=hostel.available_rooms,
-        #     amenities=hostel.amenities,
-        #     rules_and_regulations=hostel.get_rules(),
-        #     created_at=hostel.created_at,
-        #     updated_at=hostel.updated_at
-        # )
-        return {"message": "Hostel created successfully."}
+
+        bucket_name = settings.MINIO_IMAGE_BUCKET_NAME
+        uploaded = []
+        if not images:
+            raise HTTPException(status_code=400, detail="No files uploaded.")
+
+        for file in images:
+            object_name = f"H{hostel.id}/{uuid4().hex}_{file.filename}"
+
+            meta = await upload_image_file_to_minio(bucket_name, object_name, file)
+
+            image = ImageMetaData(
+                file_name=meta["file_name"],
+                bucket_name=meta["bucket_name"],
+                object_name=meta["object_name"],
+                etag=meta["etag"],
+                version_id=meta.get("version_id"),
+                hostel_id=hostel.id
+            )
+
+            self.image_repository.create_image_metadata(image)
+
+            uploaded.append({
+                "id": image.id,
+                "file_name": image.file_name
+            })
+
+        image_count = len(uploaded)
+
+        return JSONResponse(content= {"message": "Upload successful","files": image_count},
+                            status_code=status.HTTP_200_OK)
 
     async def update_hostel(self, data: HostelUpdateSchema, current_user: User):
         # check if user is a hostel owner

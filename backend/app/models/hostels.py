@@ -16,7 +16,6 @@ class Hostel(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(255), nullable=False, unique=True)
-    image_url = Column(String(255), nullable=True)
     description = Column(Text, nullable=False)
     location = Column(String(255), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # Links to User

@@ -14,7 +14,7 @@ from backend.app.repository.images import ImageMetaDataRepository
 from backend.app.responses.images import Images
 from backend.app.utils.s3minio.minio_client import  generate_presigned_url, upload_image_file_to_minio
 
-from backend.app.models.users import User
+from backend.app.models.users import User, UserRole
 from backend.app.core.config import get_settings
 from uuid import uuid4
 
@@ -30,7 +30,7 @@ class RoomService:
 
     async def create_room(self, images: List[UploadFile], data: RoomCreateSchema, current_user: User):
         # Authorization check
-        if not current_user.hostel_owner:
+        if not current_user.role == UserRole.HOSTEL_OWNER:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
         # Fetch owned hostels
@@ -51,7 +51,6 @@ class RoomService:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="Room with this number already exists.")
 
-        draft_id = uuid4().hex
 
         # Create room instance
         room = Room(
@@ -75,7 +74,7 @@ class RoomService:
             raise HTTPException(status_code=400, detail="No files uploaded.")
 
         for file in images:
-            object_name = f"{room.id}/{uuid4().hex}_{file.filename}"
+            object_name = f"R{room.id}/{uuid4().hex}_{file.filename}"
 
             meta = await upload_image_file_to_minio(bucket_name, object_name, file)
 
@@ -84,8 +83,7 @@ class RoomService:
                 bucket_name=meta["bucket_name"],
                 object_name=meta["object_name"],
                 etag=meta["etag"],
-                version_id=meta.get("version_id"),
-                draft_id=draft_id, # ← stored for later association
+                version_id=meta.get("version_id"), # ← stored for later association
                 room_id=room.id
             )
 
