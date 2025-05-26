@@ -4,8 +4,6 @@ from datetime import datetime
 
 class Images(BaseModel):
     url: HttpUrl
-    alt_text: Optional[str] = None
-
 
 
 class HostelResponse(BaseModel):
@@ -14,14 +12,14 @@ class HostelResponse(BaseModel):
     """
     id: int
     name: constr(min_length=1, max_length=255)
-    image_url: List[Images]
     description: constr(min_length=1)
     location: constr(min_length=1, max_length=255)
     owner_id: conint(ge=1)
     average_price: conint(ge=1)
     available_rooms: conint(ge=0)
     rules_and_regulations: List[str]
-    amenities: Optional[str] = None  # Change to str for consistency with Text field in DB
+    amenities: Optional[str] = None
+    image_url: List[Images]
     created_at: datetime  # Use datetime for proper date handling
     updated_at: Optional[datetime] = None  # Use datetime for proper date handling
 

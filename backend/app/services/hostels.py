@@ -2,14 +2,14 @@ from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 
 from backend.app.models.hostels import Hostel
-from backend.app.models.users import User
+from backend.app.models.users import User,UserRole
 from backend.app.repository.hostels import HostelRepository
 from backend.app.schemas.hostels import *
 from backend.app.responses.hostels import *
 
 from backend.app.core.config import get_settings
 from uuid import uuid4
-from backend.app.utils.s3minio.minio_client import upload_image_file_to_minio
+from backend.app.utils.s3minio.minio_client import upload_image_file_to_minio, generate_presigned_url
 from backend.app.models.images import ImageMetaData
 from backend.app.repository.images import ImageMetaDataRepository
 
@@ -23,6 +23,10 @@ class HostelService:
 
     async def create_hostel(self, images: List[UploadFile], data: HostelCreateSchema, current_user: User):
         # check if user is a hostel owner
+        # Authorization check
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
+
 
         # check if Hostel with this name exists
         hostel_exists = self.hostel_repository.get_hostel_by_name(data.name)
@@ -140,10 +144,9 @@ class HostelService:
 
     async def get_all_my_hostels(self, current_user: User) -> HostelListResponse:
 
-        # check if user is a hostel owner
-        if not current_user.hostel_owner:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                detail="User is not authorized to delete a hostel.")
+        # Authorization check
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
         # get the hostels by owner id
         hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
@@ -221,10 +224,9 @@ class HostelService:
         return HostelSearchResponse(results=hostels_data)
 
     async def get_hostel_detail(self, hostel_id: int, current_user: User):
-        # Check if user is a hostel owner
-        if not current_user.hostel_owner:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                detail="User is not authorized to view hostel details.")
+        # Authorization check
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
         # Fetch the hostel details by hostel_id
         hostel = self.hostel_repository.get_hostel_by_id(hostel_id)
@@ -235,14 +237,26 @@ class HostelService:
         if hostel.user_id != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this hostel.")
 
+        # Get all this room image metadata from images table
+        images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+        if not images:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+
+        image_urls = []
+
+        # Get presigned_url for all the images
+        for image in images:
+            url = generate_presigned_url(image.bucket_name, image.object_name)
+            image_urls.append({"url": url})
+
         # Return the hostel details in the response
         return HostelResponse(
             id=hostel.id,
             name=hostel.name,
-            image_url=hostel.image_url,
+            image_url=image_urls,
             description=hostel.description,
             location=hostel.location,
-            owner_id=hostel.owner_id,
+            owner_id=hostel.user_id,
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,

@@ -293,9 +293,6 @@ class RoomService:
             price_per_semester=room.price_per_semester,
             room_type=room.room_type.value,  # Convert Enum to string
             availability=room.availability,
-            capacity=room.capacity,
-            bathroom=room.bathroom,
-            balcony=room.balcony,
             image_url=image_urls,
             created_at=room.created_at,
             updated_at=room.updated_at

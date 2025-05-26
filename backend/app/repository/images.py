@@ -35,4 +35,4 @@ class ImageMetaDataRepository:
         return self.session.query(ImageMetaData).filter(ImageMetaData.room_id == room_id).all()
 
     def get_image_metadata_by_hostel_id(self, hostel_id: int):
-        return self.session.query(ImageMetaData).filter(ImageMetaData.hostel == hostel_id).all()
+        return self.session.query(ImageMetaData).filter(ImageMetaData.hostel_id == hostel_id).all()
