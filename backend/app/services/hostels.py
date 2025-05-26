@@ -141,7 +141,7 @@ class HostelService:
 
         return JSONResponse("Hostel deleted successfully.")
 
-
+# working +
     async def get_all_my_hostels(self, current_user: User) -> HostelListResponse:
 
         # Authorization check
@@ -153,38 +153,69 @@ class HostelService:
         if not hostels:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
 
-        hostel_responses = [
-            HostelResponse(
+        hostel_list = []
+
+        for hostel in hostels:
+            # Get all this room image metadata from images table
+            images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+            # if not images:
+            #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+
+            image_urls = []
+
+            # Get presigned_url for all the images
+            for image in images:
+                url = generate_presigned_url(image.bucket_name, image.object_name)
+                image_urls.append({"url": url})
+
+            hostel_response = HostelResponse(
                 id=hostel.id,
                 name=hostel.name,
-                image_url=hostel.image_url,
+                image_url=image_urls,
                 description=hostel.description,
                 location=hostel.location,
-                owner_id=hostel.owner_id,
+                owner_id=hostel.user_id,
                 average_price=hostel.average_price,
                 available_rooms=hostel.available_rooms,
-                rules_and_regulations=hostel.get_rules(),
                 amenities=hostel.amenities,
+                rules_and_regulations=hostel.get_rules(),
                 created_at=hostel.created_at,
                 updated_at=hostel.updated_at,
             )
-            for hostel in hostels
-        ]
+
+            hostel_list.append(hostel_response)
 
         # Return a single HostelListResponse with the list of HostelResponse
-        return HostelListResponse(hostels=hostel_responses)
+        return HostelListResponse(hostels=hostel_list)
 
+# working +
     async def get_all_hostels(self) -> HostelListResponse:
+
+
         hostels =  self.hostel_repository.get_all_hostels()
-        # Convert each hostel (SQLAlchemy object) into HostelResponse
-        hostel_responses = [
-            HostelResponse(
+
+        hostel_list = []
+
+        for hostel in hostels:
+            # Get all this room image metadata from images table
+            images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+            # if not images:
+            #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+
+            image_urls = []
+
+            # Get presigned_url for all the images
+            for image in images:
+                url = generate_presigned_url(image.bucket_name, image.object_name)
+                image_urls.append({"url": url})
+
+            hostel_response = HostelResponse(
                 id=hostel.id,
                 name=hostel.name,
-                image_url=hostel.image_url,
+                image_url=image_urls,
                 description=hostel.description,
                 location=hostel.location,
-                owner_id=hostel.owner_id,
+                owner_id=hostel.user_id,
                 average_price=hostel.average_price,
                 available_rooms=hostel.available_rooms,
                 amenities=hostel.amenities,
@@ -192,11 +223,11 @@ class HostelService:
                 created_at=hostel.created_at,
                 updated_at=hostel.updated_at,
             )
-            for hostel in hostels
-        ]
+
+            hostel_list.append(hostel_response)
 
         # Return a single HostelListResponse with the list of HostelResponse
-        return HostelListResponse(hostels=hostel_responses)
+        return HostelListResponse(hostels=hostel_list)
 
     async def search_hostels(self, search_data: HostelSearchSchema) -> HostelSearchResponse:
         results = self.hostel_repository.search_hostels(search_data.query)
@@ -223,6 +254,7 @@ class HostelService:
         #  TODO: ADD PAGINATION
         return HostelSearchResponse(results=hostels_data)
 
+# working +
     async def get_hostel_detail(self, hostel_id: int, current_user: User):
         # Authorization check
         if not current_user.role == UserRole.HOSTEL_OWNER:
@@ -265,6 +297,7 @@ class HostelService:
             updated_at=hostel.updated_at,
         )
 
+# working +
     async def get_hostel_detail_user(self, hostel_id: int):
 
         # Fetch the hostel details by hostel_id
@@ -272,14 +305,26 @@ class HostelService:
         if not hostel:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel not found.")
 
+        # Get all this hostel image metadata from images table
+        images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+        if not images:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+
+        image_urls = []
+
+        # Get presigned_url for all the images
+        for image in images:
+            url = generate_presigned_url(image.bucket_name, image.object_name)
+            image_urls.append({"url": url})
+
         # Return the hostel details in the response
         return HostelResponse(
             id=hostel.id,
             name=hostel.name,
-            image_url=hostel.image_url,
+            image_url=image_urls,
             description=hostel.description,
             location=hostel.location,
-            owner_id=hostel.owner_id,
+            owner_id=hostel.user_id,
             average_price=hostel.average_price,
             available_rooms=hostel.available_rooms,
             amenities=hostel.amenities,
@@ -287,3 +332,4 @@ class HostelService:
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
+
