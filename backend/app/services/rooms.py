@@ -1,4 +1,3 @@
-from docutils.nodes import description
 from fastapi import HTTPException, status, UploadFile
 from fastapi.responses import JSONResponse
 
@@ -28,6 +27,7 @@ class RoomService:
         self.hostel_repository = hostel_repository
         self.image_repository = image_repo
 
+# working +
     async def create_room(self, images: List[UploadFile], data: RoomCreateSchema, current_user: User):
         # Authorization check
         if not current_user.role == UserRole.HOSTEL_OWNER:
@@ -197,20 +197,14 @@ class RoomService:
 
         return JSONResponse(content={"message": "Room deleted successfully"}, status_code=status.HTTP_200_OK)
 
-
+# working +
     async def get_all_rooms_by_hostel_id_custodian(self, hostel_id: int, current_user: User):
         # Authorization check
-        if not current_user.hostel_owner:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to view rooms")
-
-        # Fetch hostel owner
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="User is not registered as a hostel owner")
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
         # Fetch owned hostels
-        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
         if not owned_hostels:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User does not own any hostel")
@@ -225,50 +219,78 @@ class RoomService:
         if not rooms:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No rooms found for this hostel")
 
-        rooms_response = [
-            RoomResponse(
+        room_list = []
+
+        for room in rooms:
+            # Get all this room image metadata from images table
+            images = self.image_repository.get_image_metadata_by_room_id(room.id)
+            # if not images:
+            #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room has no images")
+
+            image_urls = []
+
+            # Get presigned_url for all the images
+            for image in images:
+                url = generate_presigned_url(image.bucket_name, image.object_name)
+                image_urls.append({"url": url})
+
+            room_response = RoomResponse(
                 id=room.id,
                 hostel_id=room.hostel_id,
                 room_number=room.room_number,
                 price_per_semester=room.price_per_semester,
                 room_type=room.room_type.value,  # Convert Enum to string
                 availability=room.availability,
-                capacity=room.capacity,
-                bathroom=room.bathroom,
-                balcony=room.balcony,
-                image_url=room.image_url,
+                image_url=image_urls,
                 created_at=room.created_at,
                 updated_at=room.updated_at
-            ) for room in rooms
-        ]
+            )
 
-        return AllRoomsResponse(rooms=rooms_response)
+            room_list.append(room_response)
 
+
+        return AllRoomsResponse(rooms=room_list)
+
+# working +
     async def get_all_rooms_by_hostel_id(self, hostel_id: int) -> AllRoomsResponse:
         rooms =  self.rooms_repository.get_all_rooms_by_hostel_id(hostel_id)
 
         if not rooms:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Rooms not found")
 
-        rooms_response = [
-            RoomResponse(
+        room_list = []
+
+        for room in rooms:
+            # Get all this room image metadata from images table
+            images = self.image_repository.get_image_metadata_by_room_id(room.id)
+            # if not images:
+            #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room has no images")
+
+            image_urls = []
+
+            # Get presigned_url for all the images
+            for image in images:
+                url = generate_presigned_url(image.bucket_name, image.object_name)
+                image_urls.append({"url": url})
+
+            room_response = RoomResponse(
                 id=room.id,
                 hostel_id=room.hostel_id,
                 room_number=room.room_number,
                 price_per_semester=room.price_per_semester,
                 room_type=room.room_type.value,  # Convert Enum to string
                 availability=room.availability,
-                capacity=room.capacity,
-                bathroom=room.bathroom,
-                balcony=room.balcony,
-                image_url=room.image_url,
+                image_url=image_urls,
                 created_at=room.created_at,
                 updated_at=room.updated_at
-            ) for room in rooms
-        ]
+            )
 
-        return AllRoomsResponse(rooms=rooms_response)
+            room_list.append(room_response)
 
+
+        return AllRoomsResponse(rooms=room_list)
+
+# working +
     async def get_single_room_by_hostel_id(self, room_number: str, hostel_id: int) -> RoomResponse:
         room = self.rooms_repository.get_room_by_room_number_and_hostel_id(room_number, hostel_id)
         if not room:
@@ -298,20 +320,14 @@ class RoomService:
             updated_at=room.updated_at
         )
 
+# working +
     async def get_single_room_by_hostel_id_custodian(self, room_number: str, hostel_id: int,
                                                      current_user: User) -> RoomResponse:
-        # Authorization check: Verify if user is a hostel owner
-        if not current_user.hostel_owner:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to view rooms")
-
-        # Fetch hostel owner from the repository
-        owner = self.hostel_owner_repository.get_hostel_owner_by_user_id(current_user.id)
-        if not owner:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail="User is not registered as a hostel owner")
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
 
         # Fetch owned hostels
-        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(owner.id)
+        owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
         if not owned_hostels:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                 detail="User does not own any hostel")
@@ -326,6 +342,19 @@ class RoomService:
         if not room:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
+        print(room.id)
+        # Get all this hostel image metadata from images table
+        images = self.image_repository.get_image_metadata_by_room_id(room.id)
+        if not images:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room has no images")
+
+        image_urls = []
+
+        # Get presigned_url for all the images
+        for image in images:
+            url = generate_presigned_url(image.bucket_name, image.object_name)
+            image_urls.append({"url": url})
+
         # Return room details in the response
         return RoomResponse(
             id=room.id,
@@ -334,10 +363,7 @@ class RoomService:
             price_per_semester=room.price_per_semester,
             room_type=room.room_type.value,  # Convert Enum to string
             availability=room.availability,
-            capacity=room.capacity,
-            bathroom=room.bathroom,
-            balcony=room.balcony,
-            image_url=room.image_url,
+            image_url=image_urls,
             created_at=room.created_at,
             updated_at=room.updated_at
         )

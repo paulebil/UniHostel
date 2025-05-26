@@ -21,6 +21,7 @@ class HostelService:
         self.hostel_repository = hostel_repository
         self.image_repository = image_repository
 
+# working +
     async def create_hostel(self, images: List[UploadFile], data: HostelCreateSchema, current_user: User):
         # check if user is a hostel owner
         # Authorization check
