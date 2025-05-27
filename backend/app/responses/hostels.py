@@ -3,8 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 
 class Images(BaseModel):
-    url: HttpUrl
-
+    url: str
 
 class HostelResponse(BaseModel):
     """
