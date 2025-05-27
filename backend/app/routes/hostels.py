@@ -77,7 +77,7 @@ async def get_hostel_detail(hostel_id: int, hostel_service: HostelService = Depe
 async def get_all_hostels(hostel_service: HostelService = Depends(get_hostel_service)):
     return await hostel_service.get_all_hostels()
 
-@hostel_user_router.put("/search", status_code=status.HTTP_200_OK, response_model=HostelSearchResponse)
+@hostel_user_router.put("/search", status_code=status.HTTP_200_OK, response_model=HostelListResponse)
 async def search_hostels(query:HostelSearchSchema, hostel_service: HostelService = Depends(get_hostel_service)):
     return await hostel_service.search_hostels(query)
 

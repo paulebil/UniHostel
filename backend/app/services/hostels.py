@@ -230,30 +230,46 @@ class HostelService:
         # Return a single HostelListResponse with the list of HostelResponse
         return HostelListResponse(hostels=hostel_list)
 
-    async def search_hostels(self, search_data: HostelSearchSchema) -> HostelSearchResponse:
+# working +
+    async def search_hostels(self, search_data: HostelSearchSchema) -> HostelListResponse:
         results = self.hostel_repository.search_hostels(search_data.query)
+
         if not results:
-            raise HTTPException(status_code=400, detail="No hostels found for this query")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No hostels found for this query")
 
-        hostels_data = [
-            HostelResponse(
-                id=hostel_data["hostel"].id,  #  Extract the actual Hostel object
-                name=hostel_data["hostel"].name,
-                image_url=hostel_data["hostel"].image_url,
-                description=hostel_data["highlighted_description"],  #  Use highlighted description
-                location=hostel_data["hostel"].location,
-                owner_id=hostel_data["hostel"].owner_id,
-                average_price=hostel_data["hostel"].average_price,
-                available_rooms=hostel_data["hostel"].available_rooms,
-                amenities=hostel_data["hostel"].amenities,
-                rules_and_regulations=hostel_data["hostel"].get_rules(),
-                created_at=hostel_data["hostel"].created_at,
-                updated_at=hostel_data["hostel"].updated_at
-            ) for hostel_data in results  #  correctly iterating over dicts
-        ]
+        hostel_list = []
 
-        #  TODO: ADD PAGINATION
-        return HostelSearchResponse(results=hostels_data)
+        for result in results:
+            hostel = result["hostel"]
+            highlighted_description = result.get("highlighted_description", hostel.description)
+
+            images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+
+            image_urls = [
+                Images(url=generate_presigned_url(image.bucket_name, image.object_name))
+                for image in images
+            ]
+
+            hostel_response = HostelResponse(
+                id=hostel.id,
+                name=hostel.name,
+                image_url=image_urls,
+                description=highlighted_description,
+                location=hostel.location,
+                owner_id=hostel.user_id,
+                average_price=hostel.average_price,
+                available_rooms=hostel.available_rooms,
+                amenities=hostel.amenities,
+                rules_and_regulations=hostel.get_rules(),
+                created_at=hostel.created_at,
+                updated_at=hostel.updated_at
+            )
+
+            hostel_list.append(hostel_response)
+
+        # TODO: Add pagination support here
+
+        return HostelListResponse(hostels=hostel_list)
 
 # working +
     async def get_hostel_detail(self, hostel_id: int, current_user: User):
