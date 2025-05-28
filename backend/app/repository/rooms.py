@@ -74,3 +74,10 @@ class RoomsRepository:
 
         # Fetch the room
         return self.session.query(Room).filter(Room.id == room_id).first()
+
+    def update_room_availability_status(self, room_id: int):
+        room = self.session.query(Room).filter(Room.id == room_id).first()
+        if room:
+            room.availability = False
+            self.session.commit()
+            self.session.refresh(room)

@@ -50,6 +50,7 @@ def get_booking_service(session: Session = Depends(get_session)) -> BookingServi
 async def create_booking(data: BookingCreateSchema, booking_service: BookingService = Depends(get_booking_service)):
     return await booking_service.create_booking(data)
 
+
 def get_receipt_service(session: Session = Depends(get_session)) -> ReceiptService:
     booking_repository = BookingRepository(session)
     room_repository = RoomsRepository(session)
@@ -73,3 +74,10 @@ def get_payment_service(session: Session = Depends(get_session)) -> PaymentServi
 @booking_user_router.post("/payment", status_code=status.HTTP_200_OK)
 async def make_payment(data: PaymentCreate, background_tasks: BackgroundTasks,payment_service: PaymentService = Depends(get_payment_service)):
     return await payment_service.create_payment(data, background_tasks)
+
+
+################################# Owner routes
+@booking_router.get("/bookings", status_code=status.HTTP_200_OK, response_model=BookingsByHostelResponse)
+async def get_all_my_bookings(current_user = Depends(security.get_current_user),
+                              booking_service: BookingService = Depends(get_booking_service)):
+    return await booking_service.get_all_room_booking_for_one_owner(current_user)

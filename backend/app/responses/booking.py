@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 import enum
 
 # Enum for Booking Status
@@ -15,7 +15,8 @@ class BookingResponseSchema(BaseModel):
 
     # Student Information
     first_name: str
-    last_email: str
+    last_name: str
+    email_address: str
     phone_number: str
     university: str
 
@@ -28,3 +29,10 @@ class BookingResponseSchema(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
+class HostelBookingSchema(BaseModel):
+    hostel_id: int
+    hostel_name: str
+    bookings: List[BookingResponseSchema]
+
+class BookingsByHostelResponse(BaseModel):
+    hostels: List[HostelBookingSchema]
