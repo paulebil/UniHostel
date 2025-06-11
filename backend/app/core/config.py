@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     APP_NAME: str = Field(..., env="APP_NAME")
     DEBUG: bool = Field(False, env="DEBUG")
     FRONTEND_HOST: str = Field(..., env="FRONTEND_HOST")
+    FRONTED_HOST_LOGIN: str = Field(..., env="FRONTED_HOST_LOGIN")
 
     # JWT Secret key
     JWT_SECRET: str = Field(..., env="JWT_SECRET")

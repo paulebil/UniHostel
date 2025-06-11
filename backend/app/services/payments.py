@@ -109,16 +109,6 @@ class PaymentService:
             student_study_year=booking_info.student_study_year,
             student_university=booking_info.student_university,
 
-            # Home Residence
-            home_address=booking_info.home_address,
-            home_district=booking_info.home_district,
-            home_country=booking_info.home_country,
-
-            # Next of kin
-            next_of_kin_name=booking_info.next_of_kin_name,
-            next_of_kin_phone=booking_info.next_of_kin_phone,
-            kin_relationship=booking_info.kin_relationship,
-
             # Pricing
             room_price_per_semester=room_info.price_per_semester,
 

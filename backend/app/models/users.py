@@ -26,7 +26,7 @@ class User(Base):
     hostels = relationship("Hostel", back_populates="user", cascade="all, delete")
 
     def get_context_string(self, context: str):
-        return f"{context}{self.password[-6:]}{self.updated_at.strftime('%m%d%Y%H%M%S')}".strip()
+        return f"{context}{self.password[-6:]}{self.mobile}".strip()
 
 
 

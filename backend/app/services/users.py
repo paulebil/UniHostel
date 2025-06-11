@@ -38,7 +38,7 @@ class UserService:
         user = User(
             name=data.name,
             email=data.email,
-            role=data.role,
+            role=UserRole.HOSTEL_OWNER,
             mobile=data.mobile,
             password=security.hash_password(data.password),
             is_active=False,
@@ -61,6 +61,8 @@ class UserService:
             token_valid = False
         if not token_valid:
             raise HTTPException(status_code=400, detail="This link is either expired or not valid.")
+        if user.is_active:
+            raise HTTPException(status_code=status.HTTP_200_OK, detail="User already activated.")
         user.is_active = True
         user.verified_at = datetime.now()
         user.updated_at = datetime.now()

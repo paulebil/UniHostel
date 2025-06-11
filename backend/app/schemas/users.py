@@ -8,8 +8,7 @@ class UserRole(str, enum.Enum):
 class UserCreateSchema(BaseModel):
     name: str
     email: str
-    mobile: conint(ge=1000000000, le=999999999999999)  # Ensures 10-15 digits
-    role: UserRole
+    mobile: str  # Ensures 10-15 digits
     password: constr(min_length=8)
 
 
