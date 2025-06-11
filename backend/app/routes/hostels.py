@@ -7,6 +7,8 @@ from backend.app.repository.hostels import HostelRepository
 from backend.app.repository.images import ImageMetaDataRepository
 from backend.app.database.database import get_session
 from backend.app.core.security import Security
+from backend.app.repository.booking import BookingRepository
+from backend.app.repository.rooms import RoomsRepository
 
 
 from sqlalchemy.orm import Session
@@ -30,7 +32,9 @@ hostel_user_router = APIRouter(
 def get_hostel_service(session: Session = Depends(get_session)) -> HostelService:
     hostel_repository = HostelRepository(session)
     image_repository = ImageMetaDataRepository(session)
-    return HostelService(hostel_repository, image_repository)
+    booking_repository = BookingRepository(session)
+    room_repository = RoomsRepository(session)
+    return HostelService(hostel_repository, image_repository, booking_repository, room_repository)
 
 @hostel_router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_hostel(name: str = Form(), location: str = Form(...),average_price:int = Form(),
@@ -70,6 +74,11 @@ async def get_all_my_hostels(hostel_service: HostelService = Depends(get_hostel_
 async def get_hostel_detail(hostel_id: int, hostel_service: HostelService = Depends(get_hostel_service),
                             current_user =Depends(security.get_current_user)):
     return await hostel_service.get_hostel_detail(hostel_id, current_user)
+
+@hostel_router.get("/dashboard", status_code=status.HTTP_200_OK, response_model=HostelDashboard)
+async def get_hostel_dashboard(current_user = Depends(security.get_current_user),
+                               hostel_service: HostelService = Depends(get_hostel_service)):
+    return await hostel_service.get_hostel_owner_dashboard(current_user)
 
 ################### Student endpoints
 

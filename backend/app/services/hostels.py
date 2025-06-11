@@ -12,14 +12,21 @@ from uuid import uuid4
 from backend.app.utils.s3minio.minio_client import upload_image_file_to_minio, generate_presigned_url
 from backend.app.models.images import ImageMetaData
 from backend.app.repository.images import ImageMetaDataRepository
+from backend.app.repository.booking import BookingRepository
+from backend.app.responses.booking import BookingResponseSchema
+from backend.app.repository.rooms import RoomsRepository
 
 settings = get_settings()
 
 
 class HostelService:
-    def __init__(self, hostel_repository: HostelRepository, image_repository: ImageMetaDataRepository):
+    def __init__(self, hostel_repository: HostelRepository, image_repository: ImageMetaDataRepository,
+                 booking_repository: BookingRepository, room_repository: RoomsRepository):
         self.hostel_repository = hostel_repository
         self.image_repository = image_repository
+        self.booking_repository = booking_repository
+        self.room_repository = room_repository
+
 
 # working +
     async def create_hostel(self, images: List[UploadFile], data: HostelCreateSchema, current_user: User):
@@ -349,4 +356,92 @@ class HostelService:
             created_at=hostel.created_at,
             updated_at=hostel.updated_at,
         )
+
+
+    async def get_hostel_owner_dashboard(self, current_user: User):
+        # Authorization check
+        if not current_user.role == UserRole.HOSTEL_OWNER:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not authorized to create a room")
+
+        # get the hostels by owner id
+        hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
+        if not hostels:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
+
+        hostel_list = []
+        available_rooms = []
+
+        for hostel in hostels:
+            # Get all this room image metadata from images table
+            images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
+            # if not images:
+            #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+
+            image_urls = []
+
+            # Get presigned_url for all the images
+            for image in images:
+                url = generate_presigned_url(image.bucket_name, image.object_name)
+                image_urls.append({"url": url})
+
+            hostel_response = HostelResponse(
+                id=hostel.id,
+                name=hostel.name,
+                image_url=image_urls,
+                description=hostel.description,
+                location=hostel.location,
+                owner_id=hostel.user_id,
+                average_price=hostel.average_price,
+                available_rooms=hostel.available_rooms,
+                amenities=hostel.amenities,
+                rules_and_regulations=hostel.get_rules(),
+                created_at=hostel.created_at,
+                updated_at=hostel.updated_at,
+            )
+
+            number_of_rooms = hostel.available_rooms
+            available_rooms.append(number_of_rooms)
+
+            hostel_list.append(hostel_response)
+
+        bookings_list = []
+        room_prices = []
+
+        for hostel in hostels:
+            bookings = self.booking_repository.get_all_room_booking_by_hostel_id(hostel.id)
+
+            for booking in bookings:
+                booking_response = BookingResponseSchema(
+                    id=booking.id,
+                    first_name=booking.first_name,
+                    last_name=booking.last_name,
+                    email_address=booking.email_address,
+                    phone_number=booking.phone_number,
+                    university=booking.university,
+                    hostel_id=booking.hostel_id,
+                    room_id=booking.room_id,
+                    status=booking.status,
+                    created_at=booking.created_at,
+                    updated_at=booking.updated_at,
+                )
+                bookings_list.append(booking_response)
+
+                # Room price
+                room = self.room_repository.get_room_by_id(booking.room_id)
+                room_price = room.price_per_semester
+                room_prices.append(room_price)
+
+
+        total_revenue = sum(room_prices)
+        total_number_of_rooms = sum(available_rooms)
+
+        return HostelDashboard(
+            hostels=hostel_list,
+            bookings=bookings_list,
+            total_revenue=str(total_revenue),
+            total_rooms=str(total_number_of_rooms)
+        )
+
+
+
 

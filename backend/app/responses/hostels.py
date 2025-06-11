@@ -1,6 +1,8 @@
 from pydantic import BaseModel, constr, conint, HttpUrl
 from typing import Optional, List
 from datetime import datetime
+from backend.app.responses.booking import BookingResponseSchema
+
 
 class Images(BaseModel):
     url: str
@@ -34,4 +36,8 @@ class HostelSearchResponse(BaseModel):
     """
     results: List[HostelResponse]
 
-
+class HostelDashboard(BaseModel):
+    hostels: List[HostelResponse]
+    bookings: List[BookingResponseSchema]
+    total_revenue: str
+    total_rooms: str
