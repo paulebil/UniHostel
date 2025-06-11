@@ -217,7 +217,7 @@ class RoomService:
         # Fetch rooms
         rooms = self.rooms_repository.get_all_rooms_by_hostel_id(hostel_id)
         if not rooms:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No rooms found for this hostel")
+            return AllRoomsResponse(rooms=[])
 
         room_list = []
 
@@ -256,7 +256,7 @@ class RoomService:
         rooms =  self.rooms_repository.get_all_rooms_by_hostel_id(hostel_id)
 
         if not rooms:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Rooms not found")
+            return AllRoomsResponse(rooms=[])
 
         room_list = []
 

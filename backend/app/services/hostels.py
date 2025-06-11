@@ -295,8 +295,8 @@ class HostelService:
 
         # Get all this room image metadata from images table
         images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
-        if not images:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+        # if not images:
+        #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
 
         image_urls = []
 
@@ -331,8 +331,8 @@ class HostelService:
 
         # Get all this hostel image metadata from images table
         images = self.image_repository.get_image_metadata_by_hostel_id(hostel.id)
-        if not images:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
+        # if not images:
+        #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hostel has no images")
 
         image_urls = []
 
