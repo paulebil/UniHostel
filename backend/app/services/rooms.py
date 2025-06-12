@@ -321,6 +321,32 @@ class RoomService:
         )
 
 # working +
+    async def get_single_room_by_room_id_and_hostel_id(self, room_id: int, hostel_id: int) -> RoomResponse:
+        room = self.rooms_repository.get_room_by_room_id_and_hostel_id(room_id, hostel_id)
+
+        # Get all this room image metadata from images table
+        images = self.image_repository.get_image_metadata_by_room_id(room.id)
+
+        image_urls = []
+
+        # Get presigned_url for all the images
+        for image in images:
+            url = generate_presigned_url(image.bucket_name, image.object_name)
+            image_urls.append({"url": url})
+
+        return RoomResponse(
+            id=room.id,
+            hostel_id=room.hostel_id,
+            room_number=room.room_number,
+            price_per_semester=room.price_per_semester,
+            room_type=room.room_type.value,  # Convert Enum to string
+            availability=room.availability,
+            image_url=image_urls,
+            created_at=room.created_at,
+            updated_at=room.updated_at
+        )
+
+# working +
     async def get_single_room_by_hostel_id_custodian(self, room_number: str, hostel_id: int,
                                                      current_user: User) -> RoomResponse:
         if not current_user.role == UserRole.HOSTEL_OWNER:

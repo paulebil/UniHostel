@@ -43,6 +43,13 @@ class RoomsRepository:
             Room.room_number == room_number
         ).first()
 
+    def get_room_by_room_id_and_hostel_id(self, room_id:int, hostel_id:int):
+        return self.session.query(Room).filter(
+            Room.hostel_id == hostel_id,
+            Room.id == room_id
+        ).first()
+
+
     def get_room_occupancy_count(self, room_id: int):
 
         room = self.session.query(Room).filter(Room.id == room_id).first()
