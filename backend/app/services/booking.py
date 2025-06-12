@@ -74,11 +74,11 @@ class BookingService:
 
         # Fetch owned hostels
         owned_hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
-        if not owned_hostels:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User does not own any hostels."
-            )
+        # if not owned_hostels:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail="User does not own any hostels."
+        #     )
 
         result = {"hostels": []}
 

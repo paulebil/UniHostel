@@ -158,8 +158,8 @@ class HostelService:
 
         # get the hostels by owner id
         hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
-        if not hostels:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
+        # if not hostels:
+        #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
 
         hostel_list = []
 
@@ -365,8 +365,6 @@ class HostelService:
 
         # get the hostels by owner id
         hostels = self.hostel_repository.get_all_hostels_by_one_owner(current_user.id)
-        if not hostels:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  detail="Hostel by this owner does not exists.")
 
         hostel_list = []
         available_rooms = []
