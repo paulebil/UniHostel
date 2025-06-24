@@ -30,7 +30,7 @@ class UserAuthEmailService:
     async def send_account_verification_email(user: User, background_task: BackgroundTasks):
         string_context = user.get_context_string(context=USER_VERIFY_ACCOUNT)
         token = security.hash_password(string_context)
-        activate_url = f"{settings.FRONTED_HOST}/account/activate/success?token={token}&email={user.email}"
+        activate_url = f"{settings.FRONTEND_HOST}/account/activate/success?token={token}&email={user.email}"
         data = {
             "app_name": settings.APP_NAME,
             "name": user.name,

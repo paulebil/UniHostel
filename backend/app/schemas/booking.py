@@ -5,8 +5,8 @@ from datetime import datetime
 
 # Enum for Booking Status
 class BookingStatus(str, enum.Enum):
-    PENDING = "PENDING"
     CONFIRMED = "CONFIRMED"
+    PENDING = "PENDING"
     CANCELLED = "CANCELLED"
 
 

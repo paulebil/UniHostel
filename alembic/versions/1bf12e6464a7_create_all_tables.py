@@ -1,8 +1,8 @@
-"""recreating all tables
+"""create all tables
 
-Revision ID: 4588f73561b7
+Revision ID: 1bf12e6464a7
 Revises: 
-Create Date: 2025-05-26 13:16:46.733575
+Create Date: 2025-06-12 22:18:58.863672
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '4588f73561b7'
+revision: str = '1bf12e6464a7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -51,7 +51,6 @@ def upgrade() -> None:
     op.create_table('hostels',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('location', sa.String(length=255), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
